@@ -8,6 +8,11 @@ body {
     background-color: #202122;
 }
 
+svg {
+    max-width: 50%;
+    text-align: center;
+}
+
 #col-container {
     display: flex;
     flex-direction: column;
@@ -62,13 +67,20 @@ body {
     cursor: pointer;
 }
 
+#settings-btn {
+    position: fixed;
+    bottom: 10px;
+    right: 10px;
+}
+
 #settings {
     display: none;
 }
 
 #settings.open {
     display: block;
-    width: 300px;
+    white-space: nowrap;
+    width: fit-content;
     margin-left: 8px;
     font-size: 14px;
 }
@@ -102,7 +114,7 @@ body {
     margin-left: 0px;
     margin-right: 40px;
     padding: 8px;
-    border-radius: 8px;
+    border-radius: 16px;
     border-bottom-left-radius: 0px;
 }
 
@@ -112,7 +124,7 @@ body {
     margin-left: 40px;
     margin-right: 0px;
     padding: 8px;
-    border-radius: 8px;
+    border-radius: 16px;
     border-bottom-right-radius: 0px;
 }
 
