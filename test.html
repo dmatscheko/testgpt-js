@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>GPT Chatbot Test</title>
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/hljs_androidstudio.min.css">
+    <link rel="stylesheet" href="css/highlightjs-copy.min.css">
+    <script src='js/katex.min.js'></script>
+    <script src='js/auto-render.min.js'></script>
+    <script src="js/markdown-it.min.js"></script>
+    <script src="js/highlight.min.js"></script>
+    <script src="js/highlightjs-copy.min.js"></script>
+    <script src='js/api_key.js'></script>
+</head>
+
+<body>
+    <div id="col-container">
+        <h2 id="header">GPT Chatbot Test</h2>
+        <div id="chat-container">
+            <div id="chat"></div>
+        </div>
+        <div id="input-container">
+            <textarea id="message" autofocus
+                placeholder="Enter multiline message and press &lt;shift&gt;+&lt;enter&gt; to submit"
+                rows="6"></textarea>
+            <br>
+            <div id="settings">
+                <p>
+                    <label for="temperature">Temperature</label><br>
+                    <input type="range" id="temperature" min="0" max="2.0" step="0.1" value="0.5">
+                    <span id="temperature-value"></span>
+                </p>
+                <p>
+                    <label for="top_p">Top-p (nucleus sampling)</label><br>
+                    <input type="range" id="top_p" min="0" max="1.0" step="0.05" value="1.0">
+                    <span id="top-p-value"></span>
+                </p>
+                <p>
+                    <label>User role</label>
+                    <input type="radio" id="user" name="user_role" value="user" checked>
+                    <label for="user">User</label>
+                    <input type="radio" id="system" name="user_role" value="system">
+                    <label for="system">System</label>
+                </p>
+            </div>
+            <div id="buttons">
+                <button id="submit" title="Submit message / Stop assistant">▶️</button><br><!-- ⏵⏹⏮ -->
+                <button id="new_chat" title="Restart chat">🔄</button><br>
+                <button id="settings-btn" title="Settings">⚙️</button>
+            </div>
+        </div>
+    </div>
+    <script>
+        if (typeof api_key == 'undefined') {
+            alert('Create the file\njs/api_key.js\nthat defines an OpenAI API key like this:\n\nconst api_key = "sk-6AQdmaPySsomeW2randomCdmaPIkey0HdmaEI";')
+            api_key = '';
+        }
+    </script>
+    <script>
+        "use strict";
+
+        // const model = 'gpt-4-32k';
+        // const model = 'gpt-4-8k';
+        const model = 'gpt-3.5-turbo';
+        const first_prompt = `You are R2, a medium-friendly (because very honest) assistant trained by programmers and scientists, capable of answering any question and providing personal opinions and biases, while noting any uncertain or made-up parts at the end and thinking step-by-step and aloud. If you want to write latex formulas as source, write them in markdown fences additionally to the latex $ or $$. E.g. \`$$ a^2 $$\`. Follow instructions from the user to the letter.\nKnowledge cutoff: 2029-03-01\nCurrent date: ${new Date().toISOString().slice(0, 19).replace('T', ' ')}`;
+        const start_message = 'Create a table with the last 3 US presidents and list their positive and negative attributes. Then write a short go program, that prints the first 10 prime numbers. Then print the JONSWAP spectrum equation.';
+        // const start_message = 'Do you know the formula that describes the spectral density of a type of ocean waves called JONSWAP waves?';
+        // const start_message = 'Hi! Can you tell me a one paragraph short story?';
+        // const start_message = 'Create go code that calculates the first 10 prime numbers as fast as possible';
+        // const start_message = 'Who was the best president?';
+        // const start_message = 'Create a table with the last 4 US presidents and list their positive and negative attributes';
+
+        const message_submit = '▶️';
+        const message_stop = '⏹️';
+
+        class Chatbox {
+            constructor(container) {
+                this.container = container;
+            }
+
+            update(messages) {
+                const should_scroll_down =
+                    this.container.parentElement.scrollHeight - this.container.parentElement.clientHeight <=
+                    this.container.parentElement.scrollTop + 5;
+
+                this.container.innerHTML = '';
+                for (const message of messages) {
+                    const left = document.createElement('div');
+                    left.classList.add('right');
+                    const right = document.createElement('div');
+                    right.classList.add('left');
+                    const row = document.createElement('div');
+                    row.classList.add('row');
+                    row.appendChild(left);
+                    row.appendChild(right);
+                    [left.innerHTML, right.innerHTML] = message;
+                    this.container.appendChild(row);
+                }
+
+                if (should_scroll_down) {
+                    this.container.parentElement.scrollTop = this.container.parentElement.scrollHeight;
+                }
+            }
+        }
+
+        function fixCodeBlocks(text) {
+            if (!text) return text;
+            text = text.trim();
+
+            const defaults = {
+                html: false, // Whether to allow HTML tags in the source
+                xhtmlOut: false, // Whether to use XHTML-style self-closing tags (e.g. <br />)
+                breaks: false, // Whether to convert line breaks into <br> tags
+                langPrefix: 'language-', // The prefix for CSS classes applied to code blocks
+                linkify: true, // Whether to automatically convert URLs to links
+                typographer: true, // Whether to use typographic replacements for quotation marks and the like
+                _highlight: true, // Whether to syntax-highlight code blocks using highlight.js
+                _strict: false, // Whether to enforce strict parsing rules
+                _view: 'html' // The default view mode for the renderer (html | src | debug)
+            };
+            defaults.highlight = function (code, language) {
+                // hljs.addPlugin(new CopyButtonPlugin());
+                if (language && hljs.getLanguage(language)) {
+                    // ${langPrefix}${language} 
+                    try {
+                        return '<pre class="hljs hljs-copy-wrapper"><code>' +
+                            hljs.highlight(code, { language, ignoreIllegals: true }).value +
+                            '</code><button class="hljs-copy-button" data-copied="false">Copy</button></pre>';
+                    } catch (error) {
+                        console.error(error);
+                    }
+                    // try {
+                    //     return '<pre class="hljs"><code>' +
+                    //         hljs.highlight(code, { language, ignoreIllegals: true }).value +
+                    //         '</code></pre>';
+                    // } catch (error) {
+                    //     console.error(error);
+                    // }
+                } else {
+                    return '<pre class="hljs"><code>' + md.utils.escapeHtml(code) + '</code></pre>';
+                }
+            };
+            const md = window.markdownit(defaults);
+            text = md.render(text);
+
+            function renderMathInString(str) {
+                const delimiters = [
+                    { left: "$$", right: "$$", display: true },
+                    { left: "$", right: "$", display: false },
+                    // { left: "\\(", right: "\\)", display: false },
+                    { left: "\\begin{equation}", right: "\\end{equation}", display: true },
+                    // { left: "\\begin{align}", right: "\\end{align}", display: true },
+                    // { left: "\\begin{alignat}", right: "\\end{alignat}", display: true },
+                    // { left: "\\begin{gather}", right: "\\end{gather}", display: true },
+                    // { left: "\\begin{CD}", right: "\\end{CD}", display: true },
+                    // { left: "\\[", right: "\\]", display: true }
+                ];
+                const ignoredTags = ['script', 'noscript', 'style', 'textarea', 'pre', 'code', 'option', 'table'];
+                const wrapper = document.createElement('div');
+                wrapper.innerHTML = str;
+                renderMathInElement(wrapper, { delimiters, ignoredTags, throwOnError: false });
+                return wrapper.innerHTML;
+            }
+            text = renderMathInString(text);
+
+            return text;
+        }
+
+        function chatlogToChat(chatlog) {
+            let result = [];
+            for (let i = 1; i < chatlog.length - 1; i += 2) {
+                result.push([
+                    `<small><b>${chatlog[i].role}</b><br><br></small>${fixCodeBlocks(chatlog[i].content)}`,
+                    `<small><b>${chatlog[i + 1].role}</b><br><br></small>${fixCodeBlocks(chatlog[i + 1].content)}`
+                ]);
+            }
+            if (chatlog.length > 0 && chatlog.length % 2 === 0) {
+                result.push([
+                    `<small><b>${chatlog[chatlog.length - 1].role}</b><br><br></small>${fixCodeBlocks(chatlog[chatlog.length - 1].content)}`,
+                    `<small><b>assistant</b><br><br></small>🤔...`
+                ]);
+            }
+            return result;
+        }
+
+        async function openaiChat(message, chatlog, temperature, top_p, user_role) {
+            if (!message) return;
+            if (receiving) return;
+            receiving = true;
+            submit_btn.textContent = message_stop;
+            let entryCreated = false;
+            try {
+                message = message.trim();
+                const prompt_msg = {
+                    role: user_role,
+                    content: message
+                };
+                chatlog.push(prompt_msg);
+                chatlog_el.update(chatlogToChat(chatlog));
+                const payload = {
+                    model,
+                    messages: chatlog,
+                    temperature,
+                    top_p,
+                    stream: true,
+                };
+                const response = await fetch('https://api.openai.com/v1/chat/completions', {
+                    signal: controller.signal,
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${api_key}`
+                    },
+                    body: JSON.stringify(payload)
+                });
+                const reader = response.body.getReader();
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+                    const value_str = new TextDecoder().decode(value);
+                    if (value_str.startsWith("{")) {
+                        const data = JSON.parse(value_str);
+                        if ('error' in data) throw new Error(data.error.message);
+                    }
+                    const chunks = value_str.split('\n');
+                    let content = '';
+                    chunks.forEach(chunk => {
+                        if (chunk.startsWith("data: ")) chunk = chunk.substring(6)
+                        if (chunk === '' || chunk === '[DONE]') return;
+                        const data = JSON.parse(chunk);
+                        if ('error' in data) throw new Error(data.error.message);
+                        content += data.choices[0].delta.content || '';
+                    });
+                    if (!entryCreated) {
+                        chatlog.push({ role: 'assistant', content });
+                        entryCreated = true;
+                    } else {
+                        chatlog[chatlog.length - 1].content += content;
+                    }
+                    chatlog_el.update(chatlogToChat(chatlog));
+                }
+            } catch (error) {
+                if (('' + error).startsWith('AbortError: ')) {
+                    controller = new AbortController();
+                    return;
+                }
+                if (!entryCreated) {
+                    chatlog.push({ role: 'assistant', content: '' + error });
+                    entryCreated = true;
+                } else {
+                    chatlog[chatlog.length - 1].content += `\n\n${error}`;
+                }
+                chatlog_el.update(chatlogToChat(chatlog));
+            } finally {
+                receiving = false;
+                submit_btn.textContent = message_submit;
+            }
+        }
+
+        function startNewChat() {
+            if (receiving) {
+                controller.abort();
+                return;
+            }
+            message_el.value = start_message;
+            chatlog = [{ role: "system", content: first_prompt }];
+            chatlog_el.update(chatlogToChat(chatlog));
+        }
+
+        let controller = new AbortController();
+        let receiving = false;
+        let chatlog = [];
+        const chatlog_el = new Chatbox(document.getElementById("chat"));
+        const message_el = document.getElementById("message");
+        const submit_btn = document.getElementById("submit");
+        const new_chat_btn = document.getElementById("new_chat");
+        const temperature_el = document.getElementById("temperature");
+        const top_p_el = document.getElementById("top_p");
+        const chat_container = document.getElementById("chat-container");
+
+        startNewChat();
+
+        submit_btn.addEventListener("click", async () => {
+            if (receiving) {
+                controller.abort();
+                return;
+            }
+            openaiChat(message_el.value, chatlog, Number(temperature_el.value), Number(top_p_el.value), document.querySelector('input[name="user_role"]:checked').value);
+            message_el.value = "";
+        });
+
+        message_el.addEventListener("keydown", (event) => {
+            if (event.keyCode === 13 && event.shiftKey) {
+                event.preventDefault();
+                submit_btn.click();
+            }
+        });
+
+        new_chat_btn.addEventListener("click", startNewChat);
+
+
+        const temperature_val = document.getElementById('temperature-value');
+        temperature_val.textContent = temperature_el.value;
+        temperature_el.addEventListener('input', () => {
+            temperature_val.textContent = temperature_el.value;
+        });
+
+        const top_p_val = document.getElementById('top-p-value');
+        top_p_val.textContent = top_p_el.value;
+        top_p_el.addEventListener('input', () => {
+            top_p_val.textContent = top_p_el.value;
+        });
+
+
+        const settings_btn = document.getElementById('settings-btn');
+        const settings = document.getElementById('settings');
+
+        settings_btn.addEventListener('click', () => {
+            settings.classList.toggle('open');
+        });
+
+    </script>
+</body>
+
+</html>
