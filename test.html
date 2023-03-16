@@ -24,8 +24,12 @@
         <div id="input-container">
             <textarea id="message" autofocus
                 placeholder="Enter multiline message and press &lt;shift&gt;+&lt;enter&gt; to submit"
-                rows="6"></textarea>
-            <br>
+                rows="3"></textarea>
+            <div id="buttons">
+                <button id="submit" title="Submit message / Stop assistant">▶️</button><br>
+                <button id="new_chat" title="Restart chat">🔄</button><br>
+                <button id="settings-btn" title="Settings">⚙️</button>
+            </div>
             <div id="settings">
                 <p>
                     <label for="temperature">Temperature</label><br>
@@ -45,11 +49,6 @@
                     <label for="system">System</label>
                 </p>
             </div>
-            <div id="buttons">
-                <button id="submit" title="Submit message / Stop assistant">▶️</button><br><!-- ⏵⏹⏮ -->
-                <button id="new_chat" title="Restart chat">🔄</button><br>
-                <button id="settings-btn" title="Settings">⚙️</button>
-            </div>
         </div>
     </div>
     <script>
@@ -61,11 +60,15 @@
     <script>
         "use strict";
 
+        // hljs.addPlugin(new CopyButtonPlugin({ lang: "en" }));
+        // console.log(hljs.listLanguages());
+
         // const model = 'gpt-4-32k';
         // const model = 'gpt-4-8k';
         const model = 'gpt-3.5-turbo';
-        const first_prompt = `You are R2, a medium-friendly (because very honest) assistant trained by programmers and scientists, capable of answering any question and providing personal opinions and biases, while noting any uncertain or made-up parts at the end and thinking step-by-step and aloud. If you want to write latex formulas as source, write them in markdown fences additionally to the latex $ or $$. E.g. \`$$ a^2 $$\`. Follow instructions from the user to the letter.\nKnowledge cutoff: 2029-03-01\nCurrent date: ${new Date().toISOString().slice(0, 19).replace('T', ' ')}`;
-        const start_message = 'Create a table with the last 3 US presidents and list their positive and negative attributes. Then write a short go program, that prints the first 10 prime numbers. Then print the JONSWAP spectrum equation.';
+        // If you want to write latex formulas as source, write them in markdown fences additionally to the latex $ or $$. E.g. \`$$ a^2 $$\`.
+        const first_prompt = `You are R2, a medium-friendly (because very honest) assistant trained by programmers and scientists, capable of answering any question and providing personal opinions and biases, while noting any uncertain or made-up parts at the end and thinking step-by-step and aloud. You can draw images, graphs, and charts using inline SVG, and formulas, using latex notation (S and $$), since both is text. Follow instructions from the user to the letter.\nKnowledge cutoff: 2029-03-01\nCurrent date: ${new Date().toISOString().slice(0, 19).replace('T', ' ')}`;
+        const start_message = 'Create a table with the last 3 US presidents and list their positive and negative attributes. Then write a short go program, that prints the first 10 prime numbers. Then print the JONSWAP spectrum equation. Then draw a house.';
         // const start_message = 'Do you know the formula that describes the spectral density of a type of ocean waves called JONSWAP waves?';
         // const start_message = 'Hi! Can you tell me a one paragraph short story?';
         // const start_message = 'Create go code that calculates the first 10 prime numbers as fast as possible';
@@ -109,38 +112,34 @@
             if (!text) return text;
             text = text.trim();
 
+            text = text.replaceAll(/<svg\s.*?<\/svg>/ismg, (match) => {
+                return '###MATCH_SVG_A###' + btoa(unescape(encodeURIComponent(match))) + '###MATCH_SVG_B###';
+            });
+
             const defaults = {
                 html: false, // Whether to allow HTML tags in the source
                 xhtmlOut: false, // Whether to use XHTML-style self-closing tags (e.g. <br />)
                 breaks: false, // Whether to convert line breaks into <br> tags
                 langPrefix: 'language-', // The prefix for CSS classes applied to code blocks
                 linkify: true, // Whether to automatically convert URLs to links
-                typographer: true, // Whether to use typographic replacements for quotation marks and the like
+                typographer: false, // Whether to use typographic replacements for quotation marks and the like
                 _highlight: true, // Whether to syntax-highlight code blocks using highlight.js
                 _strict: false, // Whether to enforce strict parsing rules
                 _view: 'html' // The default view mode for the renderer (html | src | debug)
             };
             defaults.highlight = function (code, language) {
-                // hljs.addPlugin(new CopyButtonPlugin());
-                if (language && hljs.getLanguage(language)) {
-                    // ${langPrefix}${language} 
-                    try {
-                        return '<pre class="hljs hljs-copy-wrapper"><code>' +
-                            hljs.highlight(code, { language, ignoreIllegals: true }).value +
-                            '</code><button class="hljs-copy-button" data-copied="false">Copy</button></pre>';
-                    } catch (error) {
-                        console.error(error);
+                let value = '';
+                try {
+                    if (language && hljs.getLanguage(language)) {
+                        value = hljs.highlight(code, { language, ignoreIllegals: true }).value;
+                    } else {
+                        value = hljs.highlightAuto(code).value;
                     }
-                    // try {
-                    //     return '<pre class="hljs"><code>' +
-                    //         hljs.highlight(code, { language, ignoreIllegals: true }).value +
-                    //         '</code></pre>';
-                    // } catch (error) {
-                    //     console.error(error);
-                    // }
-                } else {
-                    return '<pre class="hljs"><code>' + md.utils.escapeHtml(code) + '</code></pre>';
+                } catch (error) {
+                    // ignore error here
+                    // console.error(error, code);
                 }
+                return '<pre class="hljs"><code>' + value + '</code></pre>';
             };
             const md = window.markdownit(defaults);
             text = md.render(text);
@@ -157,13 +156,17 @@
                     // { left: "\\begin{CD}", right: "\\end{CD}", display: true },
                     // { left: "\\[", right: "\\]", display: true }
                 ];
-                const ignoredTags = ['script', 'noscript', 'style', 'textarea', 'pre', 'code', 'option', 'table'];
+                const ignoredTags = ['script', 'noscript', 'style', 'textarea', 'pre', 'code', 'option', 'table', 'svg'];
                 const wrapper = document.createElement('div');
                 wrapper.innerHTML = str;
                 renderMathInElement(wrapper, { delimiters, ignoredTags, throwOnError: false });
                 return wrapper.innerHTML;
             }
             text = renderMathInString(text);
+
+            text = text.replaceAll(/###MATCH_SVG_A###([A-Za-z0-9/=%+-]+?)###MATCH_SVG_B###/ig, (match, p1) => {
+                return decodeURIComponent(escape(atob(p1)));
+            });
 
             return text;
         }
@@ -265,6 +268,7 @@
                 return;
             }
             message_el.value = start_message;
+            message_el.style.height = "auto";
             chatlog = [{ role: "system", content: first_prompt }];
             chatlog_el.update(chatlogToChat(chatlog));
         }
@@ -289,6 +293,7 @@
             }
             openaiChat(message_el.value, chatlog, Number(temperature_el.value), Number(top_p_el.value), document.querySelector('input[name="user_role"]:checked').value);
             message_el.value = "";
+            message_el.style.height = "auto";
         });
 
         message_el.addEventListener("keydown", (event) => {
@@ -299,7 +304,6 @@
         });
 
         new_chat_btn.addEventListener("click", startNewChat);
-
 
         const temperature_val = document.getElementById('temperature-value');
         temperature_val.textContent = temperature_el.value;
@@ -321,6 +325,17 @@
             settings.classList.toggle('open');
         });
 
+        message_el.addEventListener("input", function () {
+            this.style.height = "auto";
+            let height = this.scrollHeight - parseInt(getComputedStyle(this).paddingTop) - parseInt(getComputedStyle(this).paddingBottom);
+            if (height > window.innerHeight / 2) {
+                height = window.innerHeight / 2;
+                this.style.overflowY = "scroll";
+            } else {
+                this.style.overflowY = "hidden";
+            }
+            if (height > this.clientHeight) this.style.height = `${height}px`;
+        });
     </script>
 </body>
 
