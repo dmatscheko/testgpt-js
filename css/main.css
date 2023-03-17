@@ -8,11 +8,6 @@ body {
     background-color: #202122;
 }
 
-svg {
-    max-width: 50%;
-    text-align: center;
-}
-
 #col-container {
     display: flex;
     flex-direction: column;
@@ -45,7 +40,7 @@ svg {
 }
 
 #input-container textarea {
-    width: calc(100% - 16px);
+    width: 100%;
     resize: none;
     border: 1px solid #20212280;
     outline: none;
@@ -55,16 +50,22 @@ svg {
     padding: 8px;
 }
 
-#input-container button {
+.toolbtn {
     background-color: #40424f;
     border: 1px solid #20212280;
     color: #fff;
     border: none;
-    padding: 8px;
-    margin: 1px;
+    padding: 2px;
+    margin: 1px 0px;
     margin-left: 8px;
     border-radius: 4px;
+    width: 35px;
+    height: 29px;
     cursor: pointer;
+}
+
+.toolbtn * {
+    color: #fff;
 }
 
 #settings-btn {
@@ -87,18 +88,6 @@ svg {
 
 #settings p {
     margin: 3px 0px;
-}
-
-#input-container details {
-    margin-top: 10px;
-}
-
-#input-container details summary {
-    cursor: default;
-}
-
-#input-container details summary:hover {
-    background-color: #2d2b5770;
 }
 
 #chat {
@@ -186,15 +175,13 @@ svg {
     display: block;
 }
 
-#message {
-    width: 100%;
+#chat svg {
+    max-width: 50%;
+    text-align: center;
 }
 
-#submit,
-#new_chat {
-    padding: 8px;
-    margin-right: 8px;
-    margin-bottom: 8px;
+#message {
+    width: 100%;
 }
 
 /* Scrollbar Styles */

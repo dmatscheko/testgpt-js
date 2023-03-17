@@ -6,12 +6,11 @@
     <title>GPT Chatbot Test</title>
     <link rel="stylesheet" href="css/main.css">
     <link rel="stylesheet" href="css/hljs_androidstudio.min.css">
-    <link rel="stylesheet" href="css/highlightjs-copy.min.css">
     <script src='js/katex.min.js'></script>
     <script src='js/auto-render.min.js'></script>
     <script src="js/markdown-it.min.js"></script>
     <script src="js/highlight.min.js"></script>
-    <script src="js/highlightjs-copy.min.js"></script>
+    <script src="js/dma-code-badge.js"></script>
     <script src='js/api_key.js'></script>
 </head>
 
@@ -26,9 +25,30 @@
                 placeholder="Enter multiline message and press &lt;shift&gt;+&lt;enter&gt; to submit"
                 rows="3"></textarea>
             <div id="buttons">
-                <button id="submit" title="Submit message / Stop assistant">▶️</button><br>
-                <button id="new_chat" title="Restart chat">🔄</button><br>
-                <button id="settings-btn" title="Settings">⚙️</button>
+                <button id="submit" title="Submit message / Stop assistant" class="toolbtn">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path
+                            d="M6 6.741c0-1.544 1.674-2.505 3.008-1.728l9.015 5.26c1.323.771 1.323 2.683 0 3.455l-9.015 5.258C7.674 19.764 6 18.803 6 17.26V6.741zM17.015 12L8 6.741V17.26L17.015 12z"
+                            fill="currentColor" />
+                    </svg>
+                </button><br><!-- ▶️ -->
+                <button id="new_chat" title="Restart chat" class="toolbtn">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path
+                            d="M7 4a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v2h4a1 1 0 1 1 0 2h-1.069l-.867 12.142A2 2 0 0 1 17.069 22H6.93a2 2 0 0 1-1.995-1.858L4.07 8H3a1 1 0 0 1 0-2h4V4zm2 2h6V4H9v2zM6.074 8l.857 12H17.07l.857-12H6.074zM10 10a1 1 0 0 1 1 1v6a1 1 0 1 1-2 0v-6a1 1 0 0 1 1-1zm4 0a1 1 0 0 1 1 1v6a1 1 0 1 1-2 0v-6a1 1 0 0 1 1-1z"
+                            fill="currentColor" />
+                    </svg>
+                </button><br><!-- 🔄 -->
+                <button id="settings-btn" title="Settings" class="toolbtn">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path
+                            d="M12 4a1 1 0 0 0-1 1c0 1.692-2.046 2.54-3.243 1.343a1 1 0 1 0-1.414 1.414C7.54 8.954 6.693 11 5 11a1 1 0 1 0 0 2c1.692 0 2.54 2.046 1.343 3.243a1 1 0 0 0 1.414 1.414C8.954 16.46 11 17.307 11 19a1 1 0 1 0 2 0c0-1.692 2.046-2.54 3.243-1.343a1 1 0 1 0 1.414-1.414C16.46 15.046 17.307 13 19 13a1 1 0 1 0 0-2c-1.692 0-2.54-2.046-1.343-3.243a1 1 0 0 0-1.414-1.414C15.046 7.54 13 6.693 13 5a1 1 0 0 0-1-1zm-2.992.777a3 3 0 0 1 5.984 0 3 3 0 0 1 4.23 4.231 3 3 0 0 1 .001 5.984 3 3 0 0 1-4.231 4.23 3 3 0 0 1-5.984 0 3 3 0 0 1-4.231-4.23 3 3 0 0 1 0-5.984 3 3 0 0 1 4.231-4.231z"
+                            fill="currentColor" />
+                        <path
+                            d="M12 10a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm-2.828-.828a4 4 0 1 1 5.656 5.656 4 4 0 0 1-5.656-5.656z"
+                            fill="currentColor" />
+                    </svg>
+                </button><!-- ⚙️ -->
             </div>
             <div id="settings">
                 <p>
@@ -60,9 +80,6 @@
     <script>
         "use strict";
 
-        // hljs.addPlugin(new CopyButtonPlugin({ lang: "en" }));
-        // console.log(hljs.listLanguages());
-
         // const model = 'gpt-4-32k';
         // const model = 'gpt-4-8k';
         const model = 'gpt-3.5-turbo';
@@ -75,12 +92,15 @@
         // const start_message = 'Who was the best president?';
         // const start_message = 'Create a table with the last 4 US presidents and list their positive and negative attributes';
 
-        const message_submit = '▶️';
-        const message_stop = '⏹️';
+        // const message_submit = '<i class="fa fa-play fa-fw fa-lg"></i>'; // ▶️
+        // const message_stop = '<i class="fa fa-stop fa-fw fa-lg"></i>'; // ⏹️
+        const message_submit = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 6.741c0-1.544 1.674-2.505 3.008-1.728l9.015 5.26c1.323.771 1.323 2.683 0 3.455l-9.015 5.258C7.674 19.764 6 18.803 6 17.26V6.741zM17.015 12L8 6.741V17.26L17.015 12z" fill="currentColor"/></svg>'; // ▶️
+        const message_stop = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M5 7a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V7zm12 0H7v10h10V7z" fill="currentColor"/></svg>'; // ⏹️
 
         class Chatbox {
-            constructor(container) {
+            constructor(container, codebadge) {
                 this.container = container;
+                this.codebadge = codebadge;
             }
 
             update(messages) {
@@ -101,6 +121,7 @@
                     [left.innerHTML, right.innerHTML] = message;
                     this.container.appendChild(row);
                 }
+                if (this.codebadge) this.codebadge.addTo(this.container);
 
                 if (should_scroll_down) {
                     this.container.parentElement.scrollTop = this.container.parentElement.scrollHeight;
@@ -112,8 +133,9 @@
             if (!text) return text;
             text = text.trim();
 
+            text = text.replaceAll(/!--MATCH_SVG_A###/ismg, '!-- NO MATCH_SVG_A###'); // partially prevent XSS -- scripts can still be created inside SVGs.
             text = text.replaceAll(/<svg\s.*?<\/svg>/ismg, (match) => {
-                return '###MATCH_SVG_A###' + btoa(unescape(encodeURIComponent(match))) + '###MATCH_SVG_B###';
+                return '<!--MATCH_SVG_A###' + btoa(unescape(encodeURIComponent(match))) + '###MATCH_SVG_B-->';
             });
 
             const defaults = {
@@ -133,13 +155,15 @@
                     if (language && hljs.getLanguage(language)) {
                         value = hljs.highlight(code, { language, ignoreIllegals: true }).value;
                     } else {
-                        value = hljs.highlightAuto(code).value;
+                        const highlighted = hljs.highlightAuto(code);
+                        language = highlighted.language ? highlighted.language : 'unknown';
+                        value = highlighted.value;
                     }
                 } catch (error) {
                     // ignore error here
                     // console.error(error, code);
                 }
-                return '<pre class="hljs"><code>' + value + '</code></pre>';
+                return `<pre class="hljs"><code class="${this.langPrefix}${language}">${value}</code></pre>`;
             };
             const md = window.markdownit(defaults);
             text = md.render(text);
@@ -164,7 +188,7 @@
             }
             text = renderMathInString(text);
 
-            text = text.replaceAll(/###MATCH_SVG_A###([A-Za-z0-9/=%+-]+?)###MATCH_SVG_B###/ig, (match, p1) => {
+            text = text.replaceAll(/(?:<|&lt;)!--MATCH_SVG_A###([A-Za-z0-9\/=%+-]+?)###MATCH_SVG_B--(?:>|&gt;)/ig, (match, p1) => {
                 return decodeURIComponent(escape(atob(p1)));
             });
 
@@ -192,7 +216,7 @@
             if (!message) return;
             if (receiving) return;
             receiving = true;
-            submit_btn.textContent = message_stop;
+            submit_btn.innerHTML = message_stop;
             let entryCreated = false;
             try {
                 message = message.trim();
@@ -258,7 +282,7 @@
                 chatlog_el.update(chatlogToChat(chatlog));
             } finally {
                 receiving = false;
-                submit_btn.textContent = message_submit;
+                submit_btn.innerHTML = message_submit;
             }
         }
 
@@ -276,7 +300,7 @@
         let controller = new AbortController();
         let receiving = false;
         let chatlog = [];
-        const chatlog_el = new Chatbox(document.getElementById("chat"));
+        const chatlog_el = new Chatbox(document.getElementById("chat"), new CodeBadge({ autoRun: false }));
         const message_el = document.getElementById("message");
         const submit_btn = document.getElementById("submit");
         const new_chat_btn = document.getElementById("new_chat");
@@ -300,6 +324,12 @@
             if (event.keyCode === 13 && event.shiftKey) {
                 event.preventDefault();
                 submit_btn.click();
+            }
+        });
+
+        document.addEventListener('keydown', function (event) {
+            if (event.key === "Escape") {
+                controller.abort();
             }
         });
 
