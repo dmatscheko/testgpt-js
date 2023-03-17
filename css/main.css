@@ -74,6 +74,21 @@ body {
     right: 10px;
 }
 
+#source {
+    position: fixed;
+    bottom: 10px;
+    left: 10px;
+}
+
+a {
+    color: #aaa;
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
 #settings {
     display: none;
 }
