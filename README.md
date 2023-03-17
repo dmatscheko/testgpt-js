@@ -8,6 +8,10 @@ The drawings are not very good yet, but better than nothing. You can improve the
 
 ### Usage:
 
+You can test it at: [https://huggingface.co/spaces/dma123/testgpt-js](https://huggingface.co/spaces/dma123/testgpt-js).
+
+You can also run it locally:
+
 1. Create an OpenAI account at [https://platform.openai.com/account](https://platform.openai.com/account).
 2. Create an API key at [https://platform.openai.com/account/api-keys](https://platform.openai.com/account/api-keys).
 3. Either always enter the API key when you open the testgpt-js page, or create the file js/api_key.js where you put the OpenAI API key like this:
