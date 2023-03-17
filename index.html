@@ -84,8 +84,9 @@
         // const model = 'gpt-4-8k';
         const model = 'gpt-3.5-turbo';
         // If you want to write latex formulas as source, write them in markdown fences additionally to the latex $ or $$. E.g. \`$$ a^2 $$\`.
-        const first_prompt = `You are R2, a medium-friendly (because very honest) assistant trained by programmers and scientists, capable of answering any question and providing personal opinions and biases, while noting any uncertain or made-up parts at the end and thinking step-by-step and aloud. You can draw images, graphs, and charts using inline SVG, and formulas, using latex notation (S and $$), since both is text. Follow instructions from the user to the letter.\nKnowledge cutoff: 2029-03-01\nCurrent date: ${new Date().toISOString().slice(0, 19).replace('T', ' ')}`;
-        const start_message = 'Create a table with the last 3 US presidents and list their positive and negative attributes. Then write a short go program, that prints the first 10 prime numbers. Then print the JONSWAP spectrum equation. Then draw a house.';
+        const first_prompt = 'You are R2, a medium-friendly (because very honest) assistant trained by programmers and scientists, capable of answering any question and providing personal opinions and biases, while noting any uncertain or made-up parts at the end and thinking step-by-step and aloud. You can draw images, graphs, and charts using inline SVG, and formulas, using latex notation (S and $$), since both is text. Follow instructions from the user to the letter.\nKnowledge cutoff: 2029-03-01\nCurrent date: ';
+        const start_message = '';
+        // const start_message = 'Create a table with the last 3 US presidents and list their positive and negative attributes. Then write a short go program, that prints the first 10 prime numbers. Then print the JONSWAP spectrum equation. Then draw a house.';
         // const start_message = 'Do you know the formula that describes the spectral density of a type of ocean waves called JONSWAP waves?';
         // const start_message = 'Hi! Can you tell me a one paragraph short story?';
         // const start_message = 'Create go code that calculates the first 10 prime numbers as fast as possible';
@@ -127,6 +128,17 @@
                     this.container.parentElement.scrollTop = this.container.parentElement.scrollHeight;
                 }
             }
+        }
+
+        function getTimestamp() {
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const formattedDate = `${year}-${month}-${day} ${hours}:${minutes}`;
+            return formattedDate;
         }
 
         function fixCodeBlocks(text) {
@@ -225,6 +237,7 @@
                     content: message
                 };
                 chatlog.push(prompt_msg);
+                chatlog[0].content = first_prompt + getTimestamp();
                 chatlog_el.update(chatlogToChat(chatlog));
                 const payload = {
                     model,
