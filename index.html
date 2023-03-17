@@ -1,6 +1,14 @@
 <!DOCTYPE html>
 <html>
 
+<!--
+# https://platform.openai.com/account/usage
+# https://platform.openai.com/docs/models/gpt-3-5
+# https://platform.openai.com/docs/api-reference/chat
+# https://openai.com/pricing
+# gpt-3.5-turbo	$0.002 / 1K tokens
+-->
+
 <head>
     <meta charset="UTF-8">
     <title>GPT Chatbot Test</title>
@@ -73,8 +81,8 @@
     </div>
     <script>
         if (typeof api_key == 'undefined') {
-            alert('Create the file\njs/api_key.js\nthat defines an OpenAI API key like this:\n\nconst api_key = "sk-6AQdmaPySsomeW2randomCdmaPIkey0HdmaEI";')
-            api_key = '';
+            api_key = prompt('Either create the file\njs/api_key.js\nwhere you put the OpenAI API key like this:\nconst api_key = "sk-6AQdmaPySsomeW2randomCdmaPIkey0HdmaEI";\n\nOr always enter the API key (only the sk-6AQdmaPySsomeW2randomCdmaPIkey0HdmaEI) at this prompt:');
+            if (api_key == null) api_key = '';
         }
     </script>
     <script>
