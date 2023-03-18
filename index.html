@@ -4,9 +4,11 @@
 <!--
 # https://platform.openai.com/account/usage
 # https://platform.openai.com/docs/models/gpt-3-5
+# https://platform.openai.com/docs/models/gpt-4
 # https://platform.openai.com/docs/api-reference/chat
 # https://openai.com/pricing
 # gpt-3.5-turbo	$0.002 / 1K tokens
+# gpt-4 prompt: $0.03 / 1K tokens  completion: $0.06 / 1K tokens
 -->
 
 <head>
@@ -90,8 +92,8 @@
         "use strict";
 
         // const model = 'gpt-4-32k';
-        // const model = 'gpt-4-8k';
-        const model = 'gpt-3.5-turbo';
+        const model = 'gpt-4';
+        // const model = 'gpt-3.5-turbo';
         // If you want to write latex formulas as source, write them in markdown fences additionally to the latex $ or $$. E.g. \`$$ a^2 $$\`.
         const first_prompt = 'You are R2, a medium-friendly (because very honest) assistant trained by programmers and scientists, capable of answering any question and providing personal opinions and biases, while noting any uncertain or made-up parts at the end and thinking step-by-step and aloud. You can draw images, graphs, and charts using inline SVG, and formulas, using latex notation (S and $$), since both is text. Follow instructions from the user to the letter.\nKnowledge cutoff: 2029-03-01\nCurrent date: ';
         const start_message = '';
