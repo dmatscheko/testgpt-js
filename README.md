@@ -6,6 +6,8 @@ It uses the streaming API for the GPT-3.5-turbo model and, additionally to writi
 
 The drawings are not very good yet, but better than nothing. You can improve them using the chat.
 
+If your API key has acces to GPT-4, you can choose that model in the settings.
+
 ### Usage:
 
 You can test it at: [https://huggingface.co/spaces/dma123/testgpt-js](https://huggingface.co/spaces/dma123/testgpt-js).
