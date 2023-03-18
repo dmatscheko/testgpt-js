@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <!--
 # https://platform.openai.com/account/usage
@@ -13,6 +13,7 @@
 
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GPT Chat Test</title>
     <link rel="stylesheet" href="css/main.css">
     <link rel="stylesheet" href="css/hljs_androidstudio.min.css">
@@ -62,6 +63,15 @@
             </div>
             <div id="settings">
                 <p>
+                    <label for="model">GPT model</label><br>
+                    <input type="radio" id="model_gpt-3.5-turbo" name="model" value="gpt-3.5-turbo" checked>
+                    <label for="model_gpt-3.5-turbo">gpt-3.5-turbo</label><br>
+                    <input type="radio" id="model_gpt-4" name="model" value="gpt-4">
+                    <label for="model_gpt-4">gpt-4</label><br>
+                    <input type="radio" id="model_gpt-4-32k" name="model" value="gpt-4-32k">
+                    <label for="model_gpt-4-32k">gpt-4-32k</label>
+                </p>
+                <p>
                     <label for="temperature">Temperature</label><br>
                     <input type="range" id="temperature" min="0" max="2.0" step="0.1" value="0.5">
                     <span id="temperature-value"></span>
@@ -72,9 +82,9 @@
                     <span id="top-p-value"></span>
                 </p>
                 <p>
-                    <label>User role</label>
+                    <label>User role</label><br>
                     <input type="radio" id="user" name="user_role" value="user" checked>
-                    <label for="user">User</label>
+                    <label for="user">User</label><br>
                     <input type="radio" id="system" name="user_role" value="system">
                     <label for="system">System</label>
                 </p>
@@ -91,9 +101,6 @@
     <script>
         "use strict";
 
-        // const model = 'gpt-4-32k';
-        const model = 'gpt-4';
-        // const model = 'gpt-3.5-turbo';
         // If you want to write latex formulas as source, write them in markdown fences additionally to the latex $ or $$. E.g. \`$$ a^2 $$\`.
         const first_prompt = 'You are R2, a medium-friendly (because very honest) assistant trained by programmers and scientists, capable of answering any question and providing personal opinions and biases, while noting any uncertain or made-up parts at the end and thinking step-by-step and aloud. You can draw images, graphs, and charts using inline SVG, and formulas, using latex notation (S and $$), since both is text. Follow instructions from the user to the letter.\nKnowledge cutoff: 2029-03-01\nCurrent date: ';
         const start_message = '';
@@ -235,7 +242,7 @@
             return result;
         }
 
-        async function openaiChat(message, chatlog, temperature, top_p, user_role) {
+        async function openaiChat(message, chatlog, model, temperature, top_p, user_role) {
             if (!message) return;
             if (receiving) return;
             receiving = true;
@@ -339,7 +346,7 @@
                 controller.abort();
                 return;
             }
-            openaiChat(message_el.value, chatlog, Number(temperature_el.value), Number(top_p_el.value), document.querySelector('input[name="user_role"]:checked').value);
+            openaiChat(message_el.value, chatlog, document.querySelector('input[name="model"]:checked').value, Number(temperature_el.value), Number(top_p_el.value), document.querySelector('input[name="user_role"]:checked').value);
             message_el.value = "";
             message_el.style.height = "auto";
         });

@@ -91,18 +91,24 @@ a:hover {
 
 #settings {
     display: none;
-}
-
-#settings.open {
-    display: block;
     white-space: nowrap;
     width: fit-content;
     margin-left: 8px;
     font-size: 14px;
+    padding: 8px;
+    background-color: #343542dd;
+    border-radius: 8px;
+    position: fixed;
+    bottom: 60px;
+    right: 10px;
+}
+
+#settings.open {
+    display: block;
 }
 
 #settings p {
-    margin: 3px 0px;
+    margin: 8px 0px;
 }
 
 #chat {
