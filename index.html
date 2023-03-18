@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,6 +8,7 @@
     <link rel="stylesheet" href="css-3rdparty/hljs_androidstudio.min.css">
     <link rel="stylesheet" href="css/main.css">
 </head>
+
 <body>
     <div id="col-container">
         <h2 id="header">GPT Chat Test</h2>
@@ -31,48 +33,47 @@
                             d="M7 4a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v2h4a1 1 0 1 1 0 2h-1.069l-.867 12.142A2 2 0 0 1 17.069 22H6.93a2 2 0 0 1-1.995-1.858L4.07 8H3a1 1 0 0 1 0-2h4V4zm2 2h6V4H9v2zM6.074 8l.857 12H17.07l.857-12H6.074zM10 10a1 1 0 0 1 1 1v6a1 1 0 1 1-2 0v-6a1 1 0 0 1 1-1zm4 0a1 1 0 0 1 1 1v6a1 1 0 1 1-2 0v-6a1 1 0 0 1 1-1z"
                             fill="currentColor" />
                     </svg>
-                </button><br>
-                <button id="settings-btn" title="Settings" class="toolbtn">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path
-                            d="M12 4a1 1 0 0 0-1 1c0 1.692-2.046 2.54-3.243 1.343a1 1 0 1 0-1.414 1.414C7.54 8.954 6.693 11 5 11a1 1 0 1 0 0 2c1.692 0 2.54 2.046 1.343 3.243a1 1 0 0 0 1.414 1.414C8.954 16.46 11 17.307 11 19a1 1 0 1 0 2 0c0-1.692 2.046-2.54 3.243-1.343a1 1 0 1 0 1.414-1.414C16.46 15.046 17.307 13 19 13a1 1 0 1 0 0-2c-1.692 0-2.54-2.046-1.343-3.243a1 1 0 0 0-1.414-1.414C15.046 7.54 13 6.693 13 5a1 1 0 0 0-1-1zm-2.992.777a3 3 0 0 1 5.984 0 3 3 0 0 1 4.23 4.231 3 3 0 0 1 .001 5.984 3 3 0 0 1-4.231 4.23 3 3 0 0 1-5.984 0 3 3 0 0 1-4.231-4.23 3 3 0 0 1 0-5.984 3 3 0 0 1 4.231-4.231z"
-                            fill="currentColor" />
-                        <path
-                            d="M12 10a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm-2.828-.828a4 4 0 1 1 5.656 5.656 4 4 0 0 1-5.656-5.656z"
-                            fill="currentColor" />
-                    </svg>
                 </button>
-            </div>
-            <div id="settings">
-                <p>
-                    <label for="model">GPT model</label><br>
-                    <input type="radio" id="model_gpt-3.5-turbo" name="model" value="gpt-3.5-turbo" checked>
-                    <label for="model_gpt-3.5-turbo">gpt-3.5-turbo</label><br>
-                    <input type="radio" id="model_gpt-4" name="model" value="gpt-4">
-                    <label for="model_gpt-4">gpt-4</label><br>
-                    <input type="radio" id="model_gpt-4-32k" name="model" value="gpt-4-32k">
-                    <label for="model_gpt-4-32k">gpt-4-32k</label>
-                </p>
-                <p>
-                    <label for="temperature">Temperature</label><br>
-                    <input type="range" id="temperature" min="0" max="2.0" step="0.1" value="0.5">
-                    <span id="temperature-value"></span>
-                </p>
-                <p>
-                    <label for="top_p">Top-p (nucleus sampling)</label><br>
-                    <input type="range" id="top_p" min="0" max="1.0" step="0.05" value="1.0">
-                    <span id="top-p-value"></span>
-                </p>
-                <p>
-                    <label>User role</label><br>
-                    <input type="radio" id="user" name="user_role" value="user" checked>
-                    <label for="user">User</label><br>
-                    <input type="radio" id="system" name="user_role" value="system">
-                    <label for="system">System</label>
-                </p>
             </div>
         </div>
         <div id="source"><small><a href="https://github.com/dmatscheko/testgpt-js">github src</a></small></div>
+        <button id="settings-btn" title="Settings" class="toolbtn">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path
+                    d="M12 4a1 1 0 0 0-1 1c0 1.692-2.046 2.54-3.243 1.343a1 1 0 1 0-1.414 1.414C7.54 8.954 6.693 11 5 11a1 1 0 1 0 0 2c1.692 0 2.54 2.046 1.343 3.243a1 1 0 0 0 1.414 1.414C8.954 16.46 11 17.307 11 19a1 1 0 1 0 2 0c0-1.692 2.046-2.54 3.243-1.343a1 1 0 1 0 1.414-1.414C16.46 15.046 17.307 13 19 13a1 1 0 1 0 0-2c-1.692 0-2.54-2.046-1.343-3.243a1 1 0 0 0-1.414-1.414C15.046 7.54 13 6.693 13 5a1 1 0 0 0-1-1zm-2.992.777a3 3 0 0 1 5.984 0 3 3 0 0 1 4.23 4.231 3 3 0 0 1 .001 5.984 3 3 0 0 1-4.231 4.23 3 3 0 0 1-5.984 0 3 3 0 0 1-4.231-4.23 3 3 0 0 1 0-5.984 3 3 0 0 1 4.231-4.231z"
+                    fill="currentColor" />
+                <path d="M12 10a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm-2.828-.828a4 4 0 1 1 5.656 5.656 4 4 0 0 1-5.656-5.656z"
+                    fill="currentColor" />
+            </svg>
+        </button>
+        <div id="settings">
+            <p>
+                <label for="model">GPT model</label><br>
+                <input type="radio" id="model_gpt-3.5-turbo" name="model" value="gpt-3.5-turbo" checked>
+                <label for="model_gpt-3.5-turbo">gpt-3.5-turbo</label><br>
+                <input type="radio" id="model_gpt-4" name="model" value="gpt-4">
+                <label for="model_gpt-4">gpt-4</label><br>
+                <input type="radio" id="model_gpt-4-32k" name="model" value="gpt-4-32k">
+                <label for="model_gpt-4-32k">gpt-4-32k</label>
+            </p>
+            <p>
+                <label for="temperature">Temperature</label><br>
+                <input type="range" id="temperature" min="0" max="2.0" step="0.1" value="0.5">
+                <span id="temperature-value"></span>
+            </p>
+            <p>
+                <label for="top_p">Top-p (nucleus sampling)</label><br>
+                <input type="range" id="top_p" min="0" max="1.0" step="0.05" value="1.0">
+                <span id="top-p-value"></span>
+            </p>
+            <p>
+                <label>User role</label><br>
+                <input type="radio" id="user" name="user_role" value="user" checked>
+                <label for="user">User</label><br>
+                <input type="radio" id="system" name="user_role" value="system">
+                <label for="system">System</label>
+            </p>
+        </div>
     </div>
     <script src='js-3rdparty/katex.min.js'></script>
     <script src='js-3rdparty/auto-render.min.js'></script>
@@ -85,4 +86,5 @@
     <script src="js/chatbox.js"></script>
     <script src="js/main.js"></script>
 </body>
+
 </html>
