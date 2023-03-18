@@ -6,6 +6,11 @@ class Message {
         this.value = value;
         this.answerAlternatives = null;
     }
+
+    getAnswerMessage() {
+        if (this.answerAlternatives === null) return null;
+        return this.answerAlternatives.getActiveMessage();
+    }
 }
 
 
@@ -52,13 +57,37 @@ class MessageTree {
         return lastMessage.answerAlternatives.addMessage(value);
     }
 
+    getFirstMessage() {
+        if (this.rootAlternatives === null) return null;
+        return this.rootAlternatives.getActiveMessage();
+    }
+
     getLastMessage() {
+        const lastAlternatives = this.getLastAlternatives();
+        if (lastAlternatives === null) return null;
+        return lastAlternatives.getActiveMessage();
+    }
+
+    getLastAlternatives() {
         let current = this.rootAlternatives;
         let last = null;
         while (current !== null) {
             last = current;
-            current = current.getActiveMessage();
+            const activeMessage = current.getActiveMessage();
+            if (activeMessage === null) break;
+            current = activeMessage.answerAlternatives;
         }
         return last;
+    }
+
+    getActiveMessages() {
+        let result = [];
+        // Trace the active path through the chatlog
+        let message = this.getFirstMessage();
+        while (message !== null) {
+            result.push(message.value);
+            message = message.getAnswerMessage();
+        }
+        return result;
     }
 }

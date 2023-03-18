@@ -24,12 +24,12 @@
                 role: user_role,
                 content: message
             };
-            chatlog.push(prompt_msg);
-            chatlog[0].content = first_prompt + getDatePrompt();
+            chatlog.addMessage(prompt_msg);
+            chatlog.rootAlternatives.getActiveMessage().content = first_prompt + getDatePrompt();
             chatlogEl.update(chatlogToChat(chatlog));
             const payload = {
                 model,
-                messages: chatlog,
+                messages: chatlog.getActiveMessages(),
                 temperature,
                 top_p,
                 stream: true,
@@ -62,10 +62,10 @@
                     content += data.choices[0].delta.content || '';
                 });
                 if (!entryCreated) {
-                    chatlog.push({ role: 'assistant', content });
+                    chatlog.addMessage({ role: 'assistant', content });
                     entryCreated = true;
                 } else {
-                    chatlog[chatlog.length - 1].content += content;
+                    chatlog.getLastMessage().value.content += content;
                 }
                 chatlogEl.update(chatlogToChat(chatlog));
             }
@@ -75,10 +75,10 @@
                 return;
             }
             if (!entryCreated) {
-                chatlog.push({ role: 'assistant', content: '' + error });
+                chatlog.addMessage({ role: 'assistant', content: '' + error });
                 entryCreated = true;
             } else {
-                chatlog[chatlog.length - 1].content += `\n\n${error}`;
+                chatlog.getLastMessage().value.content += `\n\n${error}`;
             }
             chatlogEl.update(chatlogToChat(chatlog));
         } finally {
@@ -105,19 +105,18 @@
     function chatlogToChat(chatlog) {
         let result = [];
 
-        // TODO: trace the active path through the chatlog
-
-        for (let i = 1; i < chatlog.length - 1; i += 2) {
+        // Trace the active path through the chatlog
+        let message = chatlog.getFirstMessage();
+        if (message !== null) message = message.getAnswerMessage(); // Ignore the prompt message
+        while (message !== null) {
+            const messageObj = message.value;
+            message = message.getAnswerMessage();
+            const answerObj = message !== null ? message.value : {role:'assistant', content:'🤔...'};
             result.push([
-                `<small><b>${chatlog[i].role}</b><br><br></small>${formatCodeBlocks(chatlog[i].content)}`,
-                `<small><b>${chatlog[i + 1].role}</b><br><br></small>${formatCodeBlocks(chatlog[i + 1].content)}`
+                `<small><b>${messageObj.role}</b><br><br></small>${formatCodeBlocks(messageObj.content)}`,
+                `<small><b>${answerObj.role}</b><br><br></small>${formatCodeBlocks(answerObj.content)}`
             ]);
-        }
-        if (chatlog.length > 0 && chatlog.length % 2 === 0) {
-            result.push([
-                `<small><b>${chatlog[chatlog.length - 1].role}</b><br><br></small>${formatCodeBlocks(chatlog[chatlog.length - 1].content)}`,
-                `<small><b>assistant</b><br><br></small>🤔...`
-            ]);
+            message = message !== null ? message.getAnswerMessage() : null;
         }
         return result;
     }
@@ -202,7 +201,7 @@
     }) => {
         // Semi global chatlog
         // Each entry looks like this: { active, { message, next }, { message, next }, ... }
-        let chatlog = [];
+        let chatlog = new MessageTree();
 
         submitBtn.addEventListener("click", () => {
             if (receiving) {
@@ -246,7 +245,8 @@
             }
             messageEl.value = start_message;
             messageEl.style.height = "auto";
-            chatlog = [{ role: "system", content: first_prompt }];
+            chatlog = new MessageTree();
+            chatlog.addMessage({ role: "system", content: first_prompt });
             chatlogEl.update(chatlogToChat(chatlog));
         });
 
