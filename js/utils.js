@@ -2,6 +2,7 @@
   "use strict";
 
 
+  // Interact with OpenAI API
   async function openaiChat(
     message,
     chatlog,
@@ -87,6 +88,7 @@
   }
 
 
+  // Returns the current date and time as prompt part
   function getDatePrompt() {
     const now = new Date();
     const year = now.getFullYear();
@@ -99,17 +101,18 @@
   }
 
 
+  // Formats the active chatlog path as array of pairs of HTML formatted messages
   function chatlogToChat(chatlog) {
     let result = [];
     for (let i = 1; i < chatlog.length - 1; i += 2) {
       result.push([
-        `<small><b>${chatlog[i].role}</b><br><br></small>${fixCodeBlocks(chatlog[i].content)}`,
-        `<small><b>${chatlog[i + 1].role}</b><br><br></small>${fixCodeBlocks(chatlog[i + 1].content)}`
+        `<small><b>${chatlog[i].role}</b><br><br></small>${formatCodeBlocks(chatlog[i].content)}`,
+        `<small><b>${chatlog[i + 1].role}</b><br><br></small>${formatCodeBlocks(chatlog[i + 1].content)}`
       ]);
     }
     if (chatlog.length > 0 && chatlog.length % 2 === 0) {
       result.push([
-        `<small><b>${chatlog[chatlog.length - 1].role}</b><br><br></small>${fixCodeBlocks(chatlog[chatlog.length - 1].content)}`,
+        `<small><b>${chatlog[chatlog.length - 1].role}</b><br><br></small>${formatCodeBlocks(chatlog[chatlog.length - 1].content)}`,
         `<small><b>assistant</b><br><br></small>🤔...`
       ]);
     }
@@ -117,7 +120,8 @@
   }
 
 
-  function fixCodeBlocks(text) {
+  // Adds syntax highlighting and renders latex formulas
+  function formatCodeBlocks(text) {
     if (!text) return text;
     text = text.trim();
 
@@ -184,6 +188,7 @@
   }
 
 
+  // Sets up event listeners for the chat interface
   globals.setUpEventListeners = ({
     chatlogEl,
     messageEl,
@@ -261,5 +266,5 @@
 
   }
 
-  
+
 }((1, eval)('this')));
