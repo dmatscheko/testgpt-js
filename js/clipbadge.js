@@ -1,11 +1,13 @@
+"use strict";
+
 // a heavily modified version of this:
 // https://unpkg.com/highlightjs-badge@0.1.9/highlightjs-badge.js
 
 // use like this:
 //
-// codeBadge({
+// const cb = new ClipBadge({
 //   templateSelector: '#my-badge-template',
-//   contentSelector: '#my-code-snippets',
+//   contentSelector: '#my-clip-snippets',
 //   autoRun: true,
 //   copyIconClass: 'fa fa-copy',
 //   copyIconContent: ' Copy',
@@ -17,11 +19,9 @@
 //   }
 // });
 
-'use strict';
-
-class CodeBadge {
+class ClipBadge {
   #defaults = {
-    templateSelector: '#code-badge-template',
+    templateSelector: '#clip-badge-template',
     contentSelector: 'body',
     autoRun: true,
     copyIconClass: '',
@@ -34,7 +34,7 @@ class CodeBadge {
   #settings = {};
 
   addBadge = (pre) => {
-    if (pre.classList.contains('code-badge-pre')) return;
+    if (pre.classList.contains('clip-badge-pre')) return;
 
     // const code = pre.querySelector('code') || pre;
     let code = pre.querySelector('code');
@@ -48,13 +48,13 @@ class CodeBadge {
 
     const language = code.className.replace(/^language-/, '');
     const badge = this.#settings.template.cloneNode(true);
-    const copyIcon = badge.querySelector('.code-badge-copy-icon');
+    const copyIcon = badge.querySelector('.clip-badge-copy-icon');
 
-    badge.classList.add('code-badge');
-    badge.querySelector('.code-badge-language').textContent = language;
+    badge.classList.add('clip-badge');
+    badge.querySelector('.clip-badge-language').textContent = language;
 
     copyIcon.className = this.#settings.copyIconClass;
-    copyIcon.classList.add('code-badge-copy-icon');
+    copyIcon.classList.add('clip-badge-copy-icon');
     copyIcon.innerHTML = this.#settings.copyIconContent;
 
     copyIcon.addEventListener('click', (event) => {
@@ -76,19 +76,19 @@ class CodeBadge {
       const clipboardItem = new ClipboardItem({ 'text/plain': new Blob([text], { type: 'text/plain' }) });
       navigator.clipboard.write([clipboardItem]).then(() => {
         copyIcon.className = this.#settings.checkIconClass;
-        copyIcon.classList.add('code-badge-copy-icon');
+        copyIcon.classList.add('clip-badge-copy-icon');
         copyIcon.innerHTML = this.#settings.checkIconContent;
 
         setTimeout(() => {
           copyIcon.className = this.#settings.copyIconClass;
-          copyIcon.classList.add('code-badge-copy-icon');
+          copyIcon.classList.add('clip-badge-copy-icon');
           copyIcon.innerHTML = this.#settings.copyIconContent;
         }, 2000);
       });
     });
 
-    code.classList.add('code-badge-pre');
-    pre.classList.add('code-badge-pre');
+    code.classList.add('clip-badge-pre');
+    pre.classList.add('clip-badge-pre');
     pre.insertBefore(badge, code);
   };
 
@@ -98,15 +98,15 @@ class CodeBadge {
       node = document.createElement("template");
       node.innerHTML = `
 <style>
-.code-badge-pre {
+.clip-badge-pre {
 position: relative;
 }
 @media print {
-.code-badge {
+.clip-badge {
 display: none;
 }
 }
-.code-badge {
+.clip-badge {
 display: flex;
 flex-flow: row nowrap;
 align-items: flex-start;
@@ -122,29 +122,29 @@ position: absolute;
 right: 0;
 top: 0;
 }
-.code-badge.active {
+.clip-badge.active {
 opacity: 0.8;
 }
-.code-badge:hover {
+.clip-badge:hover {
 opacity: .95;
 }
-.code-badge a,
-.code-badge a:hover {
+.clip-badge a,
+.clip-badge a:hover {
 text-decoration: none;
 }
-.code-badge-language {
+.clip-badge-language {
 margin-right: 10px;
 font-weight: 600;
 color: goldenrod;
 }
-.code-badge-copy-icon {
+.clip-badge-copy-icon {
 font-size: 1em;
 cursor: pointer;
 padding: 0 7px;
 margin-top: 2;
 user-select: none;
 }
-.code-badge-copy-icon * {
+.clip-badge-copy-icon * {
 cursor: pointer;
 vertical-align: top;
 }
@@ -152,18 +152,16 @@ vertical-align: top;
 color: limegreen !important;
 }
 </style>
-<div class="code-badge">
-<div class="code-badge-language"></div>
+<div class="clip-badge">
+<div class="clip-badge-language"></div>
 <div title="Copy to clipboard">
-<div class="code-badge-copy-icon"></div>
+<div class="clip-badge-copy-icon"></div>
 </div>
 </div>
       `;
     }
     return node;
   };
-
-
 
   addAll = () => {
     const addAllInternal = () => {
@@ -195,7 +193,7 @@ color: limegreen !important;
   #init = () => {
     const node = this.#getTemplate();
     const style = node.content.querySelector("style").cloneNode(true);
-    const template = node.content.querySelector('.code-badge').cloneNode(true);
+    const template = node.content.querySelector('.clip-badge').cloneNode(true);
     document.head.appendChild(style);
     this.#settings.template = template;
 
@@ -207,7 +205,7 @@ color: limegreen !important;
     if (document.readyState === 'loading') {
       document.addEventListener('DOMContentLoaded', this.#init);
     } else {
-      init();
+      this.#init();
     }
   }
 }

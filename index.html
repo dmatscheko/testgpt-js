@@ -1,30 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
-
-<!--
-# https://platform.openai.com/account/usage
-# https://platform.openai.com/docs/models/gpt-3-5
-# https://platform.openai.com/docs/models/gpt-4
-# https://platform.openai.com/docs/api-reference/chat
-# https://openai.com/pricing
-# gpt-3.5-turbo	$0.002 / 1K tokens
-# gpt-4 prompt: $0.03 / 1K tokens  completion: $0.06 / 1K tokens
--->
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GPT Chat Test</title>
+    <link rel="stylesheet" href="css-3rdparty/hljs_androidstudio.min.css">
     <link rel="stylesheet" href="css/main.css">
-    <link rel="stylesheet" href="css/hljs_androidstudio.min.css">
-    <script src='js/katex.min.js'></script>
-    <script src='js/auto-render.min.js'></script>
-    <script src="js/markdown-it.min.js"></script>
-    <script src="js/highlight.min.js"></script>
-    <script src="js/dma-code-badge.js"></script>
-    <script src='js/api_key.js'></script>
 </head>
-
 <body>
     <div id="col-container">
         <h2 id="header">GPT Chat Test</h2>
@@ -42,14 +24,14 @@
                             d="M6 6.741c0-1.544 1.674-2.505 3.008-1.728l9.015 5.26c1.323.771 1.323 2.683 0 3.455l-9.015 5.258C7.674 19.764 6 18.803 6 17.26V6.741zM17.015 12L8 6.741V17.26L17.015 12z"
                             fill="currentColor" />
                     </svg>
-                </button><br><!-- ▶️ -->
+                </button><br>
                 <button id="new_chat" title="Restart chat" class="toolbtn">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path
                             d="M7 4a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v2h4a1 1 0 1 1 0 2h-1.069l-.867 12.142A2 2 0 0 1 17.069 22H6.93a2 2 0 0 1-1.995-1.858L4.07 8H3a1 1 0 0 1 0-2h4V4zm2 2h6V4H9v2zM6.074 8l.857 12H17.07l.857-12H6.074zM10 10a1 1 0 0 1 1 1v6a1 1 0 1 1-2 0v-6a1 1 0 0 1 1-1zm4 0a1 1 0 0 1 1 1v6a1 1 0 1 1-2 0v-6a1 1 0 0 1 1-1z"
                             fill="currentColor" />
                     </svg>
-                </button><br><!-- 🔄 -->
+                </button><br>
                 <button id="settings-btn" title="Settings" class="toolbtn">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path
@@ -59,7 +41,7 @@
                             d="M12 10a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm-2.828-.828a4 4 0 1 1 5.656 5.656 4 4 0 0 1-5.656-5.656z"
                             fill="currentColor" />
                     </svg>
-                </button><!-- ⚙️ -->
+                </button>
             </div>
             <div id="settings">
                 <p>
@@ -92,312 +74,15 @@
         </div>
         <div id="source"><small><a href="https://github.com/dmatscheko/testgpt-js">github src</a></small></div>
     </div>
-    <script>
-        if (typeof api_key == 'undefined') {
-            api_key = prompt('Either create the file\njs/api_key.js\nwhere you put the OpenAI API key like this:\nconst api_key = "sk-6AQdmaPySsomeW2randomCdmaPIkey0HdmaEI";\n\nOr always enter the API key (only the sk-6AQdmaPySsomeW2randomCdmaPIkey0HdmaEI) at this prompt:');
-            if (api_key == null) api_key = '';
-        }
-    </script>
-    <script>
-        "use strict";
-
-        // If you want to write latex formulas as source, write them in markdown fences additionally to the latex $ or $$. E.g. \`$$ a^2 $$\`.
-        const first_prompt = 'You are R2, a medium-friendly (because very honest) assistant trained by programmers and scientists, capable of answering any question and providing personal opinions and biases, while noting any uncertain or made-up parts at the end and thinking step-by-step and aloud. You can draw images, graphs, and charts using inline SVG, and formulas, using latex notation (S and $$), since both is text. Follow instructions from the user to the letter.\nKnowledge cutoff: 2029-03-01\nCurrent date: ';
-        const start_message = '';
-        // const start_message = 'Create a table with the last 3 US presidents and list their positive and negative attributes. Then write a short go program, that prints the first 10 prime numbers. Then print the JONSWAP spectrum equation. Then draw a house.';
-        // const start_message = 'Do you know the formula that describes the spectral density of a type of ocean waves called JONSWAP waves?';
-        // const start_message = 'Hi! Can you tell me a one paragraph short story?';
-        // const start_message = 'Create go code that calculates the first 10 prime numbers as fast as possible';
-        // const start_message = 'Who was the best president?';
-        // const start_message = 'Create a table with the last 4 US presidents and list their positive and negative attributes';
-
-        // const message_submit = '<i class="fa fa-play fa-fw fa-lg"></i>'; // ▶️
-        // const message_stop = '<i class="fa fa-stop fa-fw fa-lg"></i>'; // ⏹️
-        const message_submit = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 6.741c0-1.544 1.674-2.505 3.008-1.728l9.015 5.26c1.323.771 1.323 2.683 0 3.455l-9.015 5.258C7.674 19.764 6 18.803 6 17.26V6.741zM17.015 12L8 6.741V17.26L17.015 12z" fill="currentColor"/></svg>'; // ▶️
-        const message_stop = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M5 7a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V7zm12 0H7v10h10V7z" fill="currentColor"/></svg>'; // ⏹️
-
-        class Chatbox {
-            constructor(container, codebadge) {
-                this.container = container;
-                this.codebadge = codebadge;
-            }
-
-            update(messages) {
-                const should_scroll_down =
-                    this.container.parentElement.scrollHeight - this.container.parentElement.clientHeight <=
-                    this.container.parentElement.scrollTop + 5;
-
-                this.container.innerHTML = '';
-                for (const message of messages) {
-                    const left = document.createElement('div');
-                    left.classList.add('right');
-                    const right = document.createElement('div');
-                    right.classList.add('left');
-                    const row = document.createElement('div');
-                    row.classList.add('row');
-                    row.appendChild(left);
-                    row.appendChild(right);
-                    [left.innerHTML, right.innerHTML] = message;
-                    this.container.appendChild(row);
-                }
-                if (this.codebadge) this.codebadge.addTo(this.container);
-
-                if (should_scroll_down) {
-                    this.container.parentElement.scrollTop = this.container.parentElement.scrollHeight;
-                }
-            }
-        }
-
-        function getTimestamp() {
-            const now = new Date();
-            const year = now.getFullYear();
-            const month = String(now.getMonth() + 1).padStart(2, '0');
-            const day = String(now.getDate()).padStart(2, '0');
-            const hours = String(now.getHours()).padStart(2, '0');
-            const minutes = String(now.getMinutes()).padStart(2, '0');
-            const formattedDate = `${year}-${month}-${day} ${hours}:${minutes}`;
-            return formattedDate;
-        }
-
-        function fixCodeBlocks(text) {
-            if (!text) return text;
-            text = text.trim();
-
-            text = text.replaceAll(/!--MATCH_SVG_A###/ismg, '!-- NO MATCH_SVG_A###'); // partially prevent XSS -- scripts can still be created inside SVGs.
-            text = text.replaceAll(/<svg\s.*?<\/svg>/ismg, (match) => {
-                return '<!--MATCH_SVG_A###' + btoa(unescape(encodeURIComponent(match))) + '###MATCH_SVG_B-->';
-            });
-
-            const defaults = {
-                html: false, // Whether to allow HTML tags in the source
-                xhtmlOut: false, // Whether to use XHTML-style self-closing tags (e.g. <br />)
-                breaks: false, // Whether to convert line breaks into <br> tags
-                langPrefix: 'language-', // The prefix for CSS classes applied to code blocks
-                linkify: true, // Whether to automatically convert URLs to links
-                typographer: false, // Whether to use typographic replacements for quotation marks and the like
-                _highlight: true, // Whether to syntax-highlight code blocks using highlight.js
-                _strict: false, // Whether to enforce strict parsing rules
-                _view: 'html' // The default view mode for the renderer (html | src | debug)
-            };
-            defaults.highlight = function (code, language) {
-                let value = '';
-                try {
-                    if (language && hljs.getLanguage(language)) {
-                        value = hljs.highlight(code, { language, ignoreIllegals: true }).value;
-                    } else {
-                        const highlighted = hljs.highlightAuto(code);
-                        language = highlighted.language ? highlighted.language : 'unknown';
-                        value = highlighted.value;
-                    }
-                } catch (error) {
-                    // ignore error here
-                    // console.error(error, code);
-                }
-                return `<pre class="hljs"><code class="${this.langPrefix}${language}">${value}</code></pre>`;
-            };
-            const md = window.markdownit(defaults);
-            text = md.render(text);
-
-            function renderMathInString(str) {
-                const delimiters = [
-                    { left: "$$", right: "$$", display: true },
-                    { left: "$", right: "$", display: false },
-                    // { left: "\\(", right: "\\)", display: false },
-                    { left: "\\begin{equation}", right: "\\end{equation}", display: true },
-                    // { left: "\\begin{align}", right: "\\end{align}", display: true },
-                    // { left: "\\begin{alignat}", right: "\\end{alignat}", display: true },
-                    // { left: "\\begin{gather}", right: "\\end{gather}", display: true },
-                    // { left: "\\begin{CD}", right: "\\end{CD}", display: true },
-                    // { left: "\\[", right: "\\]", display: true }
-                ];
-                const ignoredTags = ['script', 'noscript', 'style', 'textarea', 'pre', 'code', 'option', 'table', 'svg'];
-                const wrapper = document.createElement('div');
-                wrapper.innerHTML = str;
-                renderMathInElement(wrapper, { delimiters, ignoredTags, throwOnError: false });
-                return wrapper.innerHTML;
-            }
-            text = renderMathInString(text);
-
-            text = text.replaceAll(/(?:<|&lt;)!--MATCH_SVG_A###([A-Za-z0-9\/=%+-]+?)###MATCH_SVG_B--(?:>|&gt;)/ig, (match, p1) => {
-                return decodeURIComponent(escape(atob(p1)));
-            });
-
-            return text;
-        }
-
-        function chatlogToChat(chatlog) {
-            let result = [];
-            for (let i = 1; i < chatlog.length - 1; i += 2) {
-                result.push([
-                    `<small><b>${chatlog[i].role}</b><br><br></small>${fixCodeBlocks(chatlog[i].content)}`,
-                    `<small><b>${chatlog[i + 1].role}</b><br><br></small>${fixCodeBlocks(chatlog[i + 1].content)}`
-                ]);
-            }
-            if (chatlog.length > 0 && chatlog.length % 2 === 0) {
-                result.push([
-                    `<small><b>${chatlog[chatlog.length - 1].role}</b><br><br></small>${fixCodeBlocks(chatlog[chatlog.length - 1].content)}`,
-                    `<small><b>assistant</b><br><br></small>🤔...`
-                ]);
-            }
-            return result;
-        }
-
-        async function openaiChat(message, chatlog, model, temperature, top_p, user_role) {
-            if (!message) return;
-            if (receiving) return;
-            receiving = true;
-            submit_btn.innerHTML = message_stop;
-            let entryCreated = false;
-            try {
-                message = message.trim();
-                const prompt_msg = {
-                    role: user_role,
-                    content: message
-                };
-                chatlog.push(prompt_msg);
-                chatlog[0].content = first_prompt + getTimestamp();
-                chatlog_el.update(chatlogToChat(chatlog));
-                const payload = {
-                    model,
-                    messages: chatlog,
-                    temperature,
-                    top_p,
-                    stream: true,
-                };
-                const response = await fetch('https://api.openai.com/v1/chat/completions', {
-                    signal: controller.signal,
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${api_key}`
-                    },
-                    body: JSON.stringify(payload)
-                });
-                const reader = response.body.getReader();
-                while (true) {
-                    const { done, value } = await reader.read();
-                    if (done) break;
-                    const value_str = new TextDecoder().decode(value);
-                    if (value_str.startsWith("{")) {
-                        const data = JSON.parse(value_str);
-                        if ('error' in data) throw new Error(data.error.message);
-                    }
-                    const chunks = value_str.split('\n');
-                    let content = '';
-                    chunks.forEach(chunk => {
-                        if (chunk.startsWith("data: ")) chunk = chunk.substring(6)
-                        if (chunk === '' || chunk === '[DONE]') return;
-                        const data = JSON.parse(chunk);
-                        if ('error' in data) throw new Error(data.error.message);
-                        content += data.choices[0].delta.content || '';
-                    });
-                    if (!entryCreated) {
-                        chatlog.push({ role: 'assistant', content });
-                        entryCreated = true;
-                    } else {
-                        chatlog[chatlog.length - 1].content += content;
-                    }
-                    chatlog_el.update(chatlogToChat(chatlog));
-                }
-            } catch (error) {
-                if (('' + error).startsWith('AbortError: ')) {
-                    controller = new AbortController();
-                    return;
-                }
-                if (!entryCreated) {
-                    chatlog.push({ role: 'assistant', content: '' + error });
-                    entryCreated = true;
-                } else {
-                    chatlog[chatlog.length - 1].content += `\n\n${error}`;
-                }
-                chatlog_el.update(chatlogToChat(chatlog));
-            } finally {
-                receiving = false;
-                submit_btn.innerHTML = message_submit;
-            }
-        }
-
-        function startNewChat() {
-            if (receiving) {
-                controller.abort();
-                return;
-            }
-            message_el.value = start_message;
-            message_el.style.height = "auto";
-            chatlog = [{ role: "system", content: first_prompt }];
-            chatlog_el.update(chatlogToChat(chatlog));
-        }
-
-        let controller = new AbortController();
-        let receiving = false;
-        let chatlog = [];
-        const chatlog_el = new Chatbox(document.getElementById("chat"), new CodeBadge({ autoRun: false }));
-        const message_el = document.getElementById("message");
-        const submit_btn = document.getElementById("submit");
-        const new_chat_btn = document.getElementById("new_chat");
-        const temperature_el = document.getElementById("temperature");
-        const top_p_el = document.getElementById("top_p");
-        const chat_container = document.getElementById("chat-container");
-
-        startNewChat();
-
-        submit_btn.addEventListener("click", async () => {
-            if (receiving) {
-                controller.abort();
-                return;
-            }
-            openaiChat(message_el.value, chatlog, document.querySelector('input[name="model"]:checked').value, Number(temperature_el.value), Number(top_p_el.value), document.querySelector('input[name="user_role"]:checked').value);
-            message_el.value = "";
-            message_el.style.height = "auto";
-        });
-
-        message_el.addEventListener("keydown", (event) => {
-            if (event.keyCode === 13 && event.shiftKey) {
-                event.preventDefault();
-                submit_btn.click();
-            }
-        });
-
-        document.addEventListener('keydown', function (event) {
-            if (event.key === "Escape") {
-                controller.abort();
-            }
-        });
-
-        new_chat_btn.addEventListener("click", startNewChat);
-
-        const temperature_val = document.getElementById('temperature-value');
-        temperature_val.textContent = temperature_el.value;
-        temperature_el.addEventListener('input', () => {
-            temperature_val.textContent = temperature_el.value;
-        });
-
-        const top_p_val = document.getElementById('top-p-value');
-        top_p_val.textContent = top_p_el.value;
-        top_p_el.addEventListener('input', () => {
-            top_p_val.textContent = top_p_el.value;
-        });
-
-
-        const settings_btn = document.getElementById('settings-btn');
-        const settings = document.getElementById('settings');
-
-        settings_btn.addEventListener('click', () => {
-            settings.classList.toggle('open');
-        });
-
-        message_el.addEventListener("input", function () {
-            this.style.height = "auto";
-            let height = this.scrollHeight - parseInt(getComputedStyle(this).paddingTop) - parseInt(getComputedStyle(this).paddingBottom);
-            if (height > window.innerHeight / 2) {
-                height = window.innerHeight / 2;
-                this.style.overflowY = "scroll";
-            } else {
-                this.style.overflowY = "hidden";
-            }
-            if (height > this.clientHeight) this.style.height = `${height}px`;
-        });
-    </script>
+    <script src='js-3rdparty/katex.min.js'></script>
+    <script src='js-3rdparty/auto-render.min.js'></script>
+    <script src="js-3rdparty/markdown-it.min.js"></script>
+    <script src="js-3rdparty/highlight.min.js"></script>
+    <script src="js/globals.js"></script>
+    <script src='js/api_key.js'></script>
+    <script src="js/clipbadge.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/chatbox.js"></script>
+    <script src="js/main.js"></script>
 </body>
-
 </html>
