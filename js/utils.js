@@ -1,99 +1,6 @@
 (function (globals) {
   "use strict";
 
-  function getDatePrompt() {
-    const now = new Date();
-    const year = now.getFullYear();
-    const month = String(now.getMonth() + 1).padStart(2, '0');
-    const day = String(now.getDate()).padStart(2, '0');
-    const hours = String(now.getHours()).padStart(2, '0');
-    const minutes = String(now.getMinutes()).padStart(2, '0');
-    const datePrompt = `\nKnowledge cutoff: none\nCurrent date: ${year}-${month}-${day}\nCurrent time: ${hours}:${minutes}`;
-    return datePrompt;
-  }
-
-  function fixCodeBlocks(text) {
-    if (!text) return text;
-    text = text.trim();
-
-    text = text.replaceAll(/!--MATCH_SVG_A###/ismg, '!-- NO MATCH_SVG_A###'); // partially prevent XSS -- scripts can still be created inside SVGs.
-    text = text.replaceAll(/<svg\s.*?<\/svg>/ismg, (match) => {
-      return '<!--MATCH_SVG_A###' + btoa(unescape(encodeURIComponent(match))) + '###MATCH_SVG_B-->';
-    });
-
-    const defaults = {
-      html: false, // Whether to allow HTML tags in the source
-      xhtmlOut: false, // Whether to use XHTML-style self-closing tags (e.g. <br />)
-      breaks: false, // Whether to convert line breaks into <br> tags
-      langPrefix: 'language-', // The prefix for CSS classes applied to code blocks
-      linkify: true, // Whether to automatically convert URLs to links
-      typographer: false, // Whether to use typographic replacements for quotation marks and the like
-      _highlight: true, // Whether to syntax-highlight code blocks using highlight.js
-      _strict: false, // Whether to enforce strict parsing rules
-      _view: 'html' // The default view mode for the renderer (html | src | debug)
-    };
-    defaults.highlight = function (code, language) {
-      let value = '';
-      try {
-        if (language && hljs.getLanguage(language)) {
-          value = hljs.highlight(code, { language, ignoreIllegals: true }).value;
-        } else {
-          const highlighted = hljs.highlightAuto(code);
-          language = highlighted.language ? highlighted.language : 'unknown';
-          value = highlighted.value;
-        }
-      } catch (error) {
-        // ignore error here
-        // console.error(error, code);
-      }
-      return `<pre class="hljs"><code class="${this.langPrefix}${language}">${value}</code></pre>`;
-    };
-    const md = window.markdownit(defaults);
-    text = md.render(text);
-
-    function renderMathInString(str) {
-      const delimiters = [
-        { left: "$$", right: "$$", display: true },
-        { left: "$", right: "$", display: false },
-        // { left: "\\(", right: "\\)", display: false },
-        { left: "\\begin{equation}", right: "\\end{equation}", display: true },
-        // { left: "\\begin{align}", right: "\\end{align}", display: true },
-        // { left: "\\begin{alignat}", right: "\\end{alignat}", display: true },
-        // { left: "\\begin{gather}", right: "\\end{gather}", display: true },
-        // { left: "\\begin{CD}", right: "\\end{CD}", display: true },
-        // { left: "\\[", right: "\\]", display: true }
-      ];
-      const ignoredTags = ['script', 'noscript', 'style', 'textarea', 'pre', 'code', 'option', 'table', 'svg'];
-      const wrapper = document.createElement('div');
-      wrapper.innerHTML = str;
-      renderMathInElement(wrapper, { delimiters, ignoredTags, throwOnError: false });
-      return wrapper.innerHTML;
-    }
-    text = renderMathInString(text);
-
-    text = text.replaceAll(/(?:<|&lt;)!--MATCH_SVG_A###([A-Za-z0-9\/=%+-]+?)###MATCH_SVG_B--(?:>|&gt;)/ig, (match, p1) => {
-      return decodeURIComponent(escape(atob(p1)));
-    });
-
-    return text;
-  }
-
-  function chatlogToChat(chatlog) {
-    let result = [];
-    for (let i = 1; i < chatlog.length - 1; i += 2) {
-      result.push([
-        `<small><b>${chatlog[i].role}</b><br><br></small>${fixCodeBlocks(chatlog[i].content)}`,
-        `<small><b>${chatlog[i + 1].role}</b><br><br></small>${fixCodeBlocks(chatlog[i + 1].content)}`
-      ]);
-    }
-    if (chatlog.length > 0 && chatlog.length % 2 === 0) {
-      result.push([
-        `<small><b>${chatlog[chatlog.length - 1].role}</b><br><br></small>${fixCodeBlocks(chatlog[chatlog.length - 1].content)}`,
-        `<small><b>assistant</b><br><br></small>🤔...`
-      ]);
-    }
-    return result;
-  }
 
   async function openaiChat(
     message,
@@ -179,6 +86,104 @@
     }
   }
 
+
+  function getDatePrompt() {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    const datePrompt = `\nKnowledge cutoff: none\nCurrent date: ${year}-${month}-${day}\nCurrent time: ${hours}:${minutes}`;
+    return datePrompt;
+  }
+
+
+  function chatlogToChat(chatlog) {
+    let result = [];
+    for (let i = 1; i < chatlog.length - 1; i += 2) {
+      result.push([
+        `<small><b>${chatlog[i].role}</b><br><br></small>${fixCodeBlocks(chatlog[i].content)}`,
+        `<small><b>${chatlog[i + 1].role}</b><br><br></small>${fixCodeBlocks(chatlog[i + 1].content)}`
+      ]);
+    }
+    if (chatlog.length > 0 && chatlog.length % 2 === 0) {
+      result.push([
+        `<small><b>${chatlog[chatlog.length - 1].role}</b><br><br></small>${fixCodeBlocks(chatlog[chatlog.length - 1].content)}`,
+        `<small><b>assistant</b><br><br></small>🤔...`
+      ]);
+    }
+    return result;
+  }
+
+
+  function fixCodeBlocks(text) {
+    if (!text) return text;
+    text = text.trim();
+
+    text = text.replaceAll(/!--MATCH_SVG_A###/ismg, '!-- NO MATCH_SVG_A###'); // partially prevent XSS -- scripts can still be created inside SVGs.
+    text = text.replaceAll(/<svg\s.*?<\/svg>/ismg, (match) => {
+      return '<!--MATCH_SVG_A###' + btoa(unescape(encodeURIComponent(match))) + '###MATCH_SVG_B-->';
+    });
+
+    const defaults = {
+      html: false, // Whether to allow HTML tags in the source
+      xhtmlOut: false, // Whether to use XHTML-style self-closing tags (e.g. <br />)
+      breaks: false, // Whether to convert line breaks into <br> tags
+      langPrefix: 'language-', // The prefix for CSS classes applied to code blocks
+      linkify: true, // Whether to automatically convert URLs to links
+      typographer: false, // Whether to use typographic replacements for quotation marks and the like
+      _highlight: true, // Whether to syntax-highlight code blocks using highlight.js
+      _strict: false, // Whether to enforce strict parsing rules
+      _view: 'html' // The default view mode for the renderer (html | src | debug)
+    };
+    defaults.highlight = function (code, language) {
+      let value = '';
+      try {
+        if (language && hljs.getLanguage(language)) {
+          value = hljs.highlight(code, { language, ignoreIllegals: true }).value;
+        } else {
+          const highlighted = hljs.highlightAuto(code);
+          language = highlighted.language ? highlighted.language : 'unknown';
+          value = highlighted.value;
+        }
+      } catch (error) {
+        // ignore error here
+        // console.error(error, code);
+      }
+      return `<pre class="hljs"><code class="${this.langPrefix}${language}">${value}</code></pre>`;
+    };
+    const md = window.markdownit(defaults);
+    text = md.render(text);
+
+    function renderMathInString(str) {
+      const delimiters = [
+        { left: "$$", right: "$$", display: true },
+        { left: "$", right: "$", display: false },
+        // { left: "\\(", right: "\\)", display: false },
+        { left: "\\begin{equation}", right: "\\end{equation}", display: true },
+        // { left: "\\begin{align}", right: "\\end{align}", display: true },
+        // { left: "\\begin{alignat}", right: "\\end{alignat}", display: true },
+        // { left: "\\begin{gather}", right: "\\end{gather}", display: true },
+        // { left: "\\begin{CD}", right: "\\end{CD}", display: true },
+        // { left: "\\[", right: "\\]", display: true }
+      ];
+      const ignoredTags = ['script', 'noscript', 'style', 'textarea', 'pre', 'code', 'option', 'table', 'svg'];
+      const wrapper = document.createElement('div');
+      wrapper.innerHTML = str;
+      renderMathInElement(wrapper, { delimiters, ignoredTags, throwOnError: false });
+      return wrapper.innerHTML;
+    }
+    text = renderMathInString(text);
+
+    text = text.replaceAll(/(?:<|&lt;)!--MATCH_SVG_A###([A-Za-z0-9\/=%+-]+?)###MATCH_SVG_B--(?:>|&gt;)/ig, (match, p1) => {
+      return decodeURIComponent(escape(atob(p1)));
+    });
+
+    return text;
+  }
+
+
   globals.setUpEventListeners = ({
     chatlogEl,
     messageEl,
@@ -256,4 +261,5 @@
 
   }
 
+  
 }((1, eval)('this')));

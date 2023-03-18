@@ -1,6 +1,7 @@
 (function (globals) {
   "use strict";
 
+
   document.addEventListener("DOMContentLoaded", () => {
     const chatlogEl = new Chatbox(
       document.getElementById("chat"),
@@ -32,4 +33,5 @@
     newChatBtn.click();
   });
 
+  
 }((1, eval)('this')));

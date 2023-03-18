@@ -1,10 +1,13 @@
 "use strict";
 
+
 class Chatbox {
+
   constructor(container, codebadge) {
     this.container = container;
     this.codebadge = codebadge;
   }
+
 
   update(messages) {
     const should_scroll_down =
@@ -30,4 +33,5 @@ class Chatbox {
       this.container.parentElement.scrollTop = this.container.parentElement.scrollHeight;
     }
   }
+
 }

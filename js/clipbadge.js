@@ -20,6 +20,7 @@
 // });
 
 class ClipBadge {
+
   #defaults = {
     templateSelector: '#clip-badge-template',
     contentSelector: 'body',
@@ -32,6 +33,7 @@ class ClipBadge {
   };
 
   #settings = {};
+
 
   addBadge = (pre) => {
     if (pre.classList.contains('clip-badge-pre')) return;
@@ -91,6 +93,7 @@ class ClipBadge {
     pre.classList.add('clip-badge-pre');
     pre.insertBefore(badge, code);
   };
+
 
   #getTemplate = () => {
     let node = document.querySelector(this.#settings.templateSelector);
@@ -163,6 +166,7 @@ color: limegreen !important;
     return node;
   };
 
+
   addAll = () => {
     const addAllInternal = () => {
       const content = document.querySelector(this.#settings.contentSelector);
@@ -178,6 +182,7 @@ color: limegreen !important;
     }
   };
 
+
   addTo = (container) => {
     const addToInternal = () => {
       const pres = container.querySelectorAll('pre.hljs');
@@ -190,6 +195,7 @@ color: limegreen !important;
     }
   };
 
+
   #init = () => {
     const node = this.#getTemplate();
     const style = node.content.querySelector("style").cloneNode(true);
@@ -200,6 +206,7 @@ color: limegreen !important;
     if (this.#settings.autoRun) this.addAll();
   };
 
+
   constructor(options = {}) {
     this.#settings = Object.assign({}, this.#defaults, options);
     if (document.readyState === 'loading') {
@@ -208,4 +215,5 @@ color: limegreen !important;
       this.#init();
     }
   }
+  
 }
