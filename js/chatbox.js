@@ -90,25 +90,43 @@ class Chatbox {
     update(chatlog, scroll = true) {
         const should_scroll_down = scroll &&
             (this.container.parentElement.scrollHeight - this.container.parentElement.clientHeight <=
-            this.container.parentElement.scrollTop + 5);
+                this.container.parentElement.scrollTop + 5);
 
         this.container.innerHTML = '';
 
+
+
+
+
+
         // Trace the active path through the chatlog
+        let alternative, messageA, messageB, msgIdxA, msgCntA, msgIdxB, msgCntB;
         let pos = 1;
-        let message = chatlog.getFirstMessage();
-        if (message !== null) message = message.getAnswerMessage(); // Ignore the prompt message
-        while (message !== null) {
-            if (message.value === null) {
-                this.container.appendChild(this.#formatMessagePairAsRow({ role: 'user', content: '🤔...' }, null, pos));
+        messageB = chatlog.getFirstMessage();
+        while (true) {
+            alternative = messageB.answerAlternatives;
+            if (alternative == null) return;
+            messageA = alternative.getActiveMessage();
+            if (messageA === null) break;
+            msgIdxA = alternative.activeMessageIndex;
+            msgCntA = alternative.messages.length;
+            if (messageA.value === null) {
+                this.container.appendChild(this.#formatMessagePairAsRow({ role: 'user', content: '🤔...' }, null, pos, msgIdxA, msgCntA, 0, 0));
                 break;
             }
-            const messageA = message.value;
-            message = message.getAnswerMessage();
-            const messageB = message !== null && message.value !== null ? message.value : { role: 'assistant', content: '🤔...' };
-            this.container.appendChild(this.#formatMessagePairAsRow(messageA, messageB, pos));
+
+            alternative = messageA.answerAlternatives;
+            messageB = alternative !== null ? alternative.getActiveMessage() : null;
+            if (messageB === null) break;
+            msgIdxB = alternative.activeMessageIndex;
+            msgCntB = alternative.messages.length;
+            if (messageB.value === null) {
+                this.container.appendChild(this.#formatMessagePairAsRow(messageA.value, { role: 'assistant', content: '🤔...' }, pos, msgIdxA, msgCntA, msgIdxB, msgCntB));
+                break;
+            }
+
+            this.container.appendChild(this.#formatMessagePairAsRow(messageA.value, messageB.value, pos, msgIdxA, msgCntA, msgIdxB, msgCntB));
             pos += 2;
-            message = message !== null ? message.getAnswerMessage() : null;
         }
         if (this.codebadge) this.codebadge.addTo(this.container);
 
@@ -119,21 +137,20 @@ class Chatbox {
 
 
     // Formats a message pair as HTML
-    #formatMessagePairAsRow(messageA, messageB, pos) {
+    #formatMessagePairAsRow(messageA, messageB, pos, msgIdxA, msgCntA, msgIdxB, msgCntB) {
         const row = document.createElement('div');
         row.classList.add('row');
-        const ping = this.#formatMessage('ping', pos, messageA);
+        const ping = this.#formatMessage(messageA, 'ping', pos, msgIdxA, msgCntA);
         row.appendChild(ping);
-        if (messageB !== null) {
-            const pong = this.#formatMessage('pong', pos + 1, messageB);
-            row.appendChild(pong);
-        }
+        if (messageB === null) return row;
+        const pong = this.#formatMessage(messageB, 'pong', pos + 1, msgIdxB, msgCntB);
+        row.appendChild(pong);
         return row;
     }
 
 
     // Formats one message as HTML
-    #formatMessage(type, pos, messageObj) {
+    #formatMessage(messageObj, type, pos, msgIdx, msgCnt) {
         const optionsEl = this.optionsEl;
         const timeout = this.timeout;
 
@@ -152,8 +169,12 @@ class Chatbox {
 
         const el = document.createElement('div');
         el.classList.add(type);
+
+        let msgStat = ''
+        if (msgIdx > 0 || msgCnt > 1) msgStat = `${msgIdx+1}/${msgCnt} `;
+
         // Using innerHTML instead of string conatenation prevents breaking the HTML with badly formatted HTML inside the messages
-        el.innerHTML = `<small><b>${messageObj.role}</b><br><br></small>${this.#formatCodeBlocks(messageObj.content)}`;
+        el.innerHTML = `<small>${msgStat}<b>${messageObj.role}</b><br><br></small>${this.#formatCodeBlocks(messageObj.content)}`;
         // if (messageObj.role === 'system') el.classList.add('system');
         el.dataset.pos = pos;
         el.addEventListener('mouseenter', mouseenter);

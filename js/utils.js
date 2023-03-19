@@ -65,6 +65,7 @@
                 chatlogEl.update(chatlog);
             }
         } catch (error) {
+            console.error(error);
             if (('' + error).startsWith('AbortError: ')) {
                 controller = new AbortController();
                 return;
