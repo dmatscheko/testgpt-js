@@ -94,18 +94,13 @@ class Chatbox {
 
         this.container.innerHTML = '';
 
-
-
-
-
-
         // Trace the active path through the chatlog
         let alternative, messageA, messageB, msgIdxA, msgCntA, msgIdxB, msgCntB;
         let pos = 1;
         messageB = chatlog.getFirstMessage();
         while (true) {
             alternative = messageB.answerAlternatives;
-            if (alternative == null) return;
+            if (alternative == null) break;
             messageA = alternative.getActiveMessage();
             if (messageA === null) break;
             msgIdxA = alternative.activeMessageIndex;
@@ -128,6 +123,7 @@ class Chatbox {
             this.container.appendChild(this.#formatMessagePairAsRow(messageA.value, messageB.value, pos, msgIdxA, msgCntA, msgIdxB, msgCntB));
             pos += 2;
         }
+
         if (this.codebadge) this.codebadge.addTo(this.container);
 
         if (should_scroll_down) {
