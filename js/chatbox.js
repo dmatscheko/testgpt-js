@@ -130,7 +130,7 @@ class Chatbox {
     }
 
 
-    // Adds syntax highlighting and renders latex formulas
+    // Adds syntax highlighting and renders latex formulas to all code blocks in a message
     #formatCodeBlocks(text) {
         if (!text) return text;
         text = text.trim();
