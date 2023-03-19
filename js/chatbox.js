@@ -28,7 +28,7 @@ class Chatbox {
         document.body.appendChild(div);
         this.optionsEl = div;
         div.innerHTML =
-        `<button id="msg_mod-prev-btn" title="Previous Message" class="toolbtn">
+            `<button id="msg_mod-prev-btn" title="Previous Message" class="toolbtn">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M19 7.766c0-1.554-1.696-2.515-3.029-1.715l-7.056 4.234c-1.295.777-1.295 2.653 0 3.43l7.056 4.234c1.333.8 3.029-.16 3.029-1.715V7.766zM9.944 12L17 7.766v8.468L9.944 12zM6 6a1 1 0 0 1 1 1v10a1 1 0 1 1-2 0V7a1 1 0 0 1 1-1z" fill="currentColor"/></svg>
         </button>
         <button id="msg_mod-next-btn" title="Next Message" class="toolbtn">
@@ -53,7 +53,7 @@ class Chatbox {
         div.addEventListener('mouseenter', mouseenter);
         div.addEventListener('mouseleave', mouseleave);
 
-        document.getElementById('msg_mod-add-btn').addEventListener('click', ()=>{
+        document.getElementById('msg_mod-add-btn').addEventListener('click', () => {
             console.log(div.dataset.pos, chatlog, chatlog.getNthAlternatives(div.dataset.pos));
             // TODO: if clicked on user message, then create an empty user message to show that it got "deleted" from that chain
             chatlog.getNthAlternatives(div.dataset.pos).addMessage({});
@@ -92,7 +92,19 @@ class Chatbox {
 
 
     // Formats a message pair as HTML
-    #formatMessagePairAsRow(messageObj, answerObj, pos) {
+    #formatMessagePairAsRow(messageA, messageB, pos) {
+        const ping = this.#formatMessage('ping', pos, messageA);
+        const pong = this.#formatMessage('pong', pos+1, messageB);
+        const row = document.createElement('div');
+        row.classList.add('row');
+        row.appendChild(ping);
+        row.appendChild(pong);
+        return row;
+    }
+
+
+    // Formats one message as HTML
+    #formatMessage(type, pos, messageObj) {
         const optionsEl = this.optionsEl;
         const timeout = this.timeout;
 
@@ -109,24 +121,15 @@ class Chatbox {
             timeout.id = setTimeout(() => { optionsEl.style.display = 'none' }, 1000);
         }
 
-        const ping = document.createElement('div');
-        ping.classList.add('ping');
-        const pong = document.createElement('div');
-        pong.classList.add('pong');
-        const row = document.createElement('div');
-        row.classList.add('row');
-        row.appendChild(ping);
-        row.appendChild(pong);
-        ping.innerHTML = `<small><b>${messageObj.role}</b><br><br></small>${this.#formatCodeBlocks(messageObj.content)}`;
-        pong.innerHTML = `<small><b>${answerObj.role}</b><br><br></small>${this.#formatCodeBlocks(answerObj.content)}`;
-        ping.dataset.pos = pos;
-        pos++;
-        pong.dataset.pos = pos;
-        ping.addEventListener('mouseenter', mouseenter);
-        ping.addEventListener('mouseleave', mouseleave);
-        pong.addEventListener('mouseenter', mouseenter);
-        pong.addEventListener('mouseleave', mouseleave);
-        return row;
+        const el = document.createElement('div');
+        el.classList.add(type);
+        // Using innerHTML instead of string conatenation prevents breaking the HTML with badly formatted HTML inside the messages
+        el.innerHTML = `<small><b>${messageObj.role}</b><br><br></small>${this.#formatCodeBlocks(messageObj.content)}`;
+        // if (messageObj.role === 'system') el.classList.add('system');
+        el.dataset.pos = pos;
+        el.addEventListener('mouseenter', mouseenter);
+        el.addEventListener('mouseleave', mouseleave);
+        return el;
     }
 
 
