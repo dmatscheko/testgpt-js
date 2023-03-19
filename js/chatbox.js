@@ -19,9 +19,9 @@ element.classList.add('hide');
 */
 
 class Chatbox {
-    constructor(chatlog, container, codebadge) {
+    constructor(chatlog, container) {
         this.container = container;
-        this.codebadge = codebadge;
+        this.codebadge = new ClipBadge({ autoRun: false });
 
         const div = document.createElement('div');
         div.id = 'msg_mod';

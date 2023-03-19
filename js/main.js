@@ -4,7 +4,7 @@
 
     document.addEventListener("DOMContentLoaded", () => {
         const chatlog = new MessageTree();
-        const chatlogEl = new Chatbox(chatlog, document.getElementById("chat"), new ClipBadge({ autoRun: false }));
+        const chatlogEl = new Chatbox(chatlog, document.getElementById("chat"));
         const messageEl = document.getElementById("message");
         const submitBtn = document.getElementById("submit");
         const newChatBtn = document.getElementById("new_chat");
