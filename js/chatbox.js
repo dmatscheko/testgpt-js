@@ -64,7 +64,9 @@ class Chatbox {
     }
 
     // Updates the HTML inside the chat window
-    update(messages) {
+    update(chatlog) {
+        const messages = this.#chatlogToChat(chatlog);
+
         const optionsEl = this.optionsEl;
         const timeout = this.timeout;
 
@@ -113,4 +115,94 @@ class Chatbox {
             this.container.parentElement.scrollTop = this.container.parentElement.scrollHeight;
         }
     }
+
+
+    // Formats the active chatlog path as array of pairs of HTML formatted messages
+    #chatlogToChat(chatlog) {
+        let result = [];
+
+        // Trace the active path through the chatlog
+        let message = chatlog.getFirstMessage();
+        if (message !== null) message = message.getAnswerMessage(); // Ignore the prompt message
+        while (message !== null) {
+            const messageObj = message.value;
+            message = message.getAnswerMessage();
+            const answerObj = message !== null ? message.value : { role: 'assistant', content: '🤔...' };
+            result.push([
+                `<small><b>${messageObj.role}</b><br><br></small>${this.#formatCodeBlocks(messageObj.content)}`,
+                `<small><b>${answerObj.role}</b><br><br></small>${this.#formatCodeBlocks(answerObj.content)}`
+            ]);
+            message = message !== null ? message.getAnswerMessage() : null;
+        }
+        return result;
+    }
+
+
+    // Adds syntax highlighting and renders latex formulas
+    #formatCodeBlocks(text) {
+        if (!text) return text;
+        text = text.trim();
+
+        text = text.replaceAll(/!--MATCH_SVG_A###/ismg, '!-- NO MATCH_SVG_A###'); // partially prevent XSS -- scripts can still be created inside SVGs.
+        text = text.replaceAll(/<svg\s.*?<\/svg>/ismg, (match) => {
+            return '<!--MATCH_SVG_A###' + btoa(unescape(encodeURIComponent(match))) + '###MATCH_SVG_B-->';
+        });
+
+        const defaults = {
+            html: false, // Whether to allow HTML tags in the source
+            xhtmlOut: false, // Whether to use XHTML-style self-closing tags (e.g. <br />)
+            breaks: false, // Whether to convert line breaks into <br> tags
+            langPrefix: 'language-', // The prefix for CSS classes applied to code blocks
+            linkify: true, // Whether to automatically convert URLs to links
+            typographer: false, // Whether to use typographic replacements for quotation marks and the like
+            _highlight: true, // Whether to syntax-highlight code blocks using highlight.js
+            _strict: false, // Whether to enforce strict parsing rules
+            _view: 'html' // The default view mode for the renderer (html | src | debug)
+        };
+        defaults.highlight = function (code, language) {
+            let value = '';
+            try {
+                if (language && hljs.getLanguage(language)) {
+                    value = hljs.highlight(code, { language, ignoreIllegals: true }).value;
+                } else {
+                    const highlighted = hljs.highlightAuto(code);
+                    language = highlighted.language ? highlighted.language : 'unknown';
+                    value = highlighted.value;
+                }
+            } catch (error) {
+                // ignore error here
+                // console.error(error, code);
+            }
+            return `<pre class="hljs"><code class="${this.langPrefix}${language}">${value}</code></pre>`;
+        };
+        const md = window.markdownit(defaults);
+        text = md.render(text);
+
+        function renderMathInString(str) {
+            const delimiters = [
+                { left: "$$", right: "$$", display: true },
+                { left: "$", right: "$", display: false },
+                // { left: "\\(", right: "\\)", display: false },
+                { left: "\\begin{equation}", right: "\\end{equation}", display: true },
+                // { left: "\\begin{align}", right: "\\end{align}", display: true },
+                // { left: "\\begin{alignat}", right: "\\end{alignat}", display: true },
+                // { left: "\\begin{gather}", right: "\\end{gather}", display: true },
+                // { left: "\\begin{CD}", right: "\\end{CD}", display: true },
+                // { left: "\\[", right: "\\]", display: true }
+            ];
+            const ignoredTags = ['script', 'noscript', 'style', 'textarea', 'pre', 'code', 'option', 'table', 'svg'];
+            const wrapper = document.createElement('div');
+            wrapper.innerHTML = str;
+            renderMathInElement(wrapper, { delimiters, ignoredTags, throwOnError: false });
+            return wrapper.innerHTML;
+        }
+        text = renderMathInString(text);
+
+        text = text.replaceAll(/(?:<|&lt;)!--MATCH_SVG_A###([A-Za-z0-9\/=%+-]+?)###MATCH_SVG_B--(?:>|&gt;)/ig, (match, p1) => {
+            return decodeURIComponent(escape(atob(p1)));
+        });
+
+        return text;
+    }
+
 }
