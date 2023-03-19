@@ -1,5 +1,7 @@
 "use strict";
 
+// TODO: merge message into Alternatives (an Alternatives IS an array of messages with each element a value and again an Alternatives):
+
 
 class Message {
     constructor(value) {
