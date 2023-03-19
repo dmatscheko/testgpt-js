@@ -48,6 +48,7 @@ body {
     background-color: #40424f;
     color: #fff;
     padding: 8px;
+    margin-right: 8px;
 }
 
 /* Generic tool buttons */
@@ -59,15 +60,11 @@ body {
     border: none;
     padding: 2px;
     margin: 1px 0px;
-    margin-left: 8px;
+    /* margin-left: 8px; */
     border-radius: 4px;
     width: 35px;
     height: 29px;
     cursor: pointer;
-}
-
-.toolbtn * {
-    color: #fff;
 }
 
 /* Source link */
@@ -99,7 +96,6 @@ a:hover {
     display: none;
     white-space: nowrap;
     width: fit-content;
-    margin-left: 8px;
     font-size: 14px;
     padding: 8px;
     background-color: #343542dd;
@@ -117,6 +113,19 @@ a:hover {
     margin: 8px 0px;
 }
 
+/* Message modificator panel */
+
+#msg_mod {
+    display: none;
+    white-space: nowrap;
+    width: fit-content;
+    height: fit-content;
+    font-size: 14px;
+    padding-right: 8px;
+    position: absolute;
+    text-align: right;
+}
+
 /* Chat flow */
 
 #chat {
@@ -126,17 +135,7 @@ a:hover {
     white-space: pre-wrap;
 }
 
-#chat>.row>.left {
-    background-color: #333338;
-    margin: 8px;
-    margin-left: 0px;
-    margin-right: 40px;
-    padding: 8px;
-    border-radius: 16px;
-    border-bottom-left-radius: 0px;
-}
-
-#chat>.row>.right {
+#chat>.row>.ping {
     background-color: #383333;
     margin: 8px;
     margin-left: 40px;
@@ -144,6 +143,16 @@ a:hover {
     padding: 8px;
     border-radius: 16px;
     border-bottom-right-radius: 0px;
+}
+
+#chat>.row>.pong {
+    background-color: #333338;
+    margin: 8px;
+    margin-left: 0px;
+    margin-right: 40px;
+    padding: 8px;
+    border-radius: 16px;
+    border-bottom-left-radius: 0px;
 }
 
 #chat p {

@@ -68,6 +68,26 @@ class MessageTree {
         return lastAlternatives.getActiveMessage();
     }
 
+    getNthMessage(n) {
+        let last = getNthAlternatives(n);
+        if (last === null) return;
+        return last.getActiveMessage();
+    }
+
+    getNthAlternatives(n) {
+        let pos = 0;
+        let current = this.rootAlternatives;
+        let last = null;
+        while (current !== null || pos === n) {
+            last = current;
+            const activeMessage = current.getActiveMessage();
+            if (activeMessage === null) break;
+            current = activeMessage.answerAlternatives;
+            pos++;
+        }
+        return last;
+    }
+
     getLastAlternatives() {
         let current = this.rootAlternatives;
         let last = null;

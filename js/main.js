@@ -3,7 +3,11 @@
 
 
     document.addEventListener("DOMContentLoaded", () => {
-        const chatlogEl = new Chatbox(
+        // Semi global chatlog
+        // Each entry looks like this: { active, { message, next }, { message, next }, ... }
+        let chatlog = new MessageTree();
+
+        const chatlogEl = new Chatbox(chatlog,
             document.getElementById("chat"),
             new ClipBadge({ autoRun: false })
         );
@@ -14,14 +18,7 @@
         const topPEl = document.getElementById("top_p");
 
         // Set up event listeners and initialize chat
-        setUpEventListeners({
-            chatlogEl,
-            messageEl,
-            submitBtn,
-            newChatBtn,
-            temperatureEl,
-            topPEl,
-        });
+        setUpEventListeners(chatlog, { chatlogEl, messageEl, submitBtn, newChatBtn, temperatureEl, topPEl });
 
         // Get API key if it is not defined already
         if (typeof api_key == 'undefined') {

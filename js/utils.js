@@ -191,7 +191,7 @@
 
 
     // Sets up event listeners for the chat interface
-    globals.setUpEventListeners = ({
+    globals.setUpEventListeners = (chatlog, {
         chatlogEl,
         messageEl,
         submitBtn,
@@ -199,10 +199,6 @@
         temperatureEl,
         topPEl,
     }) => {
-        // Semi global chatlog
-        // Each entry looks like this: { active, { message, next }, { message, next }, ... }
-        let chatlog = new MessageTree();
-
         submitBtn.addEventListener("click", () => {
             if (receiving) {
                 controller.abort();
