@@ -1,6 +1,6 @@
 "use strict";
 
-// TODO: merge message into Alternatives (an Alternatives IS an array of messages with each element a value and again an Alternatives):
+// TODO: maybe merge message into Alternatives (an Alternatives IS an array of messages with each element a value and again an Alternatives):
 
 
 class Message {
@@ -24,6 +24,11 @@ class Alternatives {
     }
 
     addMessage(value) {
+        const current = this.getActiveMessage();
+        if (current !== null && current.value === null) {
+            current.value = value;
+            return current;
+        }
         const newMessage = new Message(value);
         this.activeMessageIndex = this.messages.push(newMessage) - 1;
         return newMessage;
@@ -38,6 +43,20 @@ class Alternatives {
 
     getActiveMessage() {
         if (this.activeMessageIndex === -1) return null;
+        return this.messages[this.activeMessageIndex];
+    }
+
+    next() {
+        if (this.activeMessageIndex === -1) return null;
+        this.activeMessageIndex++;
+        if (this.activeMessageIndex > this.messages.length - 1) this.activeMessageIndex = 0;
+        return this.messages[this.activeMessageIndex];
+    }
+
+    prev() {
+        if (this.activeMessageIndex === -1) return null;
+        this.activeMessageIndex--;
+        if (this.activeMessageIndex < 0) this.activeMessageIndex = this.messages.length - 1;
         return this.messages[this.activeMessageIndex];
     }
 }
@@ -55,6 +74,10 @@ class MessageTree {
             this.rootAlternatives = new Alternatives();
             return this.rootAlternatives.addMessage(value);
         }
+        if (lastMessage.value === null) {
+            lastMessage.value = value;
+            return lastMessage;
+        }
         lastMessage.answerAlternatives = new Alternatives();
         return lastMessage.answerAlternatives.addMessage(value);
     }
@@ -71,42 +94,43 @@ class MessageTree {
     }
 
     getNthMessage(n) {
-        let last = getNthAlternatives(n);
-        if (last === null) return;
-        return last.getActiveMessage();
+        n = parseInt(n);
+        let alternative = getNthAlternatives(n);
+        if (alternative === null) return null;
+        return alternative.getActiveMessage();
     }
 
     getNthAlternatives(n) {
+        n = parseInt(n);
         let pos = 0;
         let current = this.rootAlternatives;
-        let last = null;
-        while (current !== null || pos === n) {
-            last = current;
+        while (current !== null) {
+            if (pos === n) return current;
             const activeMessage = current.getActiveMessage();
-            if (activeMessage === null) break;
+            if (activeMessage === null || activeMessage.answerAlternatives === null) break;
             current = activeMessage.answerAlternatives;
             pos++;
         }
-        return last;
+        return null;
     }
 
     getLastAlternatives() {
         let current = this.rootAlternatives;
-        let last = null;
+        let last = current;
         while (current !== null) {
             last = current;
             const activeMessage = current.getActiveMessage();
-            if (activeMessage === null) break;
+            if (activeMessage === null || activeMessage.answerAlternatives === null) break;
             current = activeMessage.answerAlternatives;
         }
         return last;
     }
 
-    getActiveMessages() {
+    getActiveMessageValues() {
         let result = [];
         // Trace the active path through the chatlog
         let message = this.getFirstMessage();
-        while (message !== null) {
+        while (message !== null && message.value !== null) {
             result.push(message.value);
             message = message.getAnswerMessage();
         }

@@ -3,33 +3,28 @@
 
 
     // Interact with OpenAI API
-    async function openaiChat(
-        message,
-        chatlog,
-        model,
-        temperature,
-        top_p,
-        user_role,
-        { chatlogEl, submitBtn }
-    ) {
-        if (!message) return;
+    async function openaiChat(message, chatlog, model, temperature, top_p, user_role, { chatlogEl, submitBtn }) {
+        if (!regenerateLastAnswer && !message) return;
         if (receiving) return;
         receiving = true;
 
         submitBtn.innerHTML = message_stop;
         let entryCreated = false;
         try {
-            message = message.trim();
-            const prompt_msg = {
-                role: user_role,
-                content: message
-            };
-            chatlog.addMessage(prompt_msg);
-            chatlog.rootAlternatives.getActiveMessage().content = first_prompt + getDatePrompt();
+            if (!regenerateLastAnswer) {
+                message = message.trim();
+                const prompt_msg = {
+                    role: user_role,
+                    content: message
+                };
+                chatlog.addMessage(prompt_msg);
+            }
+            regenerateLastAnswer = false;
+            chatlog.getFirstMessage().value.content = first_prompt + getDatePrompt();
             chatlogEl.update(chatlog);
             const payload = {
                 model,
-                messages: chatlog.getActiveMessages(),
+                messages: chatlog.getActiveMessageValues(),
                 temperature,
                 top_p,
                 stream: true,

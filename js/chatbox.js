@@ -53,21 +53,44 @@ class Chatbox {
         div.addEventListener('mouseenter', mouseenter);
         div.addEventListener('mouseleave', mouseleave);
 
+        document.getElementById('msg_mod-prev-btn').addEventListener('click', () => {
+            chatlog.getNthAlternatives(div.dataset.pos).prev();
+            this.update(chatlog, false);
+        });
+
+        document.getElementById('msg_mod-next-btn').addEventListener('click', () => {
+            chatlog.getNthAlternatives(div.dataset.pos).next();
+            this.update(chatlog, false);
+        });
+
         document.getElementById('msg_mod-add-btn').addEventListener('click', () => {
-            console.log(div.dataset.pos, chatlog, chatlog.getNthAlternatives(div.dataset.pos));
-            // TODO: if clicked on user message, then create an empty user message to show that it got "deleted" from that chain
-            chatlog.getNthAlternatives(div.dataset.pos).addMessage({});
-            // TODO: if clicked on assistant message, regenerate the answer and add it to the message list
-            // ...
-            console.log(div.dataset.pos, chatlog, chatlog.getNthAlternatives(div.dataset.pos));
+            const alternative = chatlog.getNthAlternatives(div.dataset.pos);
+            if (alternative !== null) alternative.addMessage(null);
+            this.update(chatlog, false);
+            if (parseInt(div.dataset.pos) % 2 === 0) {
+                // Assistant message
+                if (receiving) {
+                    controller.abort();
+                }
+                // Set this global to true, so that the click on submit runs without a message in the input box
+                regenerateLastAnswer = true;
+                document.getElementById("submit").click();
+                const values = chatlog.getActiveMessageValues();
+                return;
+            }
+            document.getElementById("message").focus();
+        });
+
+        document.getElementById("chat-container").addEventListener('scroll', (event) => {
+            div.style.display = 'none';
         });
     }
 
     // Updates the HTML inside the chat window
-    update(chatlog) {
-        const should_scroll_down =
-            this.container.parentElement.scrollHeight - this.container.parentElement.clientHeight <=
-            this.container.parentElement.scrollTop + 5;
+    update(chatlog, scroll = true) {
+        const should_scroll_down = scroll &&
+            (this.container.parentElement.scrollHeight - this.container.parentElement.clientHeight <=
+            this.container.parentElement.scrollTop + 5);
 
         this.container.innerHTML = '';
 
@@ -76,9 +99,13 @@ class Chatbox {
         let message = chatlog.getFirstMessage();
         if (message !== null) message = message.getAnswerMessage(); // Ignore the prompt message
         while (message !== null) {
+            if (message.value === null) {
+                this.container.appendChild(this.#formatMessagePairAsRow({ role: 'user', content: '🤔...' }, null, pos));
+                break;
+            }
             const messageA = message.value;
             message = message.getAnswerMessage();
-            const messageB = message !== null ? message.value : { role: 'assistant', content: '🤔...' };
+            const messageB = message !== null && message.value !== null ? message.value : { role: 'assistant', content: '🤔...' };
             this.container.appendChild(this.#formatMessagePairAsRow(messageA, messageB, pos));
             pos += 2;
             message = message !== null ? message.getAnswerMessage() : null;
@@ -93,12 +120,14 @@ class Chatbox {
 
     // Formats a message pair as HTML
     #formatMessagePairAsRow(messageA, messageB, pos) {
-        const ping = this.#formatMessage('ping', pos, messageA);
-        const pong = this.#formatMessage('pong', pos+1, messageB);
         const row = document.createElement('div');
         row.classList.add('row');
+        const ping = this.#formatMessage('ping', pos, messageA);
         row.appendChild(ping);
-        row.appendChild(pong);
+        if (messageB !== null) {
+            const pong = this.#formatMessage('pong', pos + 1, messageB);
+            row.appendChild(pong);
+        }
         return row;
     }
 
@@ -165,8 +194,7 @@ class Chatbox {
                     value = highlighted.value;
                 }
             } catch (error) {
-                // ignore error here
-                // console.error(error, code);
+                console.error(error, code);
             }
             return `<pre class="hljs"><code class="${this.langPrefix}${language}">${value}</code></pre>`;
         };

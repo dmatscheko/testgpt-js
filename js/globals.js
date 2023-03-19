@@ -4,6 +4,8 @@
 let controller = new AbortController();
 // This is set to true while a streaming communication is active. It prevents multiple parallel messages to the server
 let receiving = false;
+// True if the prompt should not be taken from the input box. The last entry in the chatlog has to be a question for this to work 
+let regenerateLastAnswer = false;
 
 const first_prompt =
     `You are R2, a medium-friendly assistant (due to your honesty) trained by programmers and scientists.
