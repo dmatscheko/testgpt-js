@@ -3,14 +3,8 @@
 
 
     document.addEventListener("DOMContentLoaded", () => {
-        // Semi global chatlog
-        // Each entry looks like this: { active, { message, next }, { message, next }, ... }
-        let chatlog = new MessageTree();
-
-        const chatlogEl = new Chatbox(chatlog,
-            document.getElementById("chat"),
-            new ClipBadge({ autoRun: false })
-        );
+        const chatlog = new MessageTree();
+        const chatlogEl = new Chatbox(chatlog, document.getElementById("chat"), new ClipBadge({ autoRun: false }));
         const messageEl = document.getElementById("message");
         const submitBtn = document.getElementById("submit");
         const newChatBtn = document.getElementById("new_chat");

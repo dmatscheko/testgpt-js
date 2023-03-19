@@ -111,7 +111,7 @@
         while (message !== null) {
             const messageObj = message.value;
             message = message.getAnswerMessage();
-            const answerObj = message !== null ? message.value : {role:'assistant', content:'🤔...'};
+            const answerObj = message !== null ? message.value : { role: 'assistant', content: '🤔...' };
             result.push([
                 `<small><b>${messageObj.role}</b><br><br></small>${formatCodeBlocks(messageObj.content)}`,
                 `<small><b>${answerObj.role}</b><br><br></small>${formatCodeBlocks(answerObj.content)}`
@@ -191,14 +191,7 @@
 
 
     // Sets up event listeners for the chat interface
-    globals.setUpEventListeners = (chatlog, {
-        chatlogEl,
-        messageEl,
-        submitBtn,
-        newChatBtn,
-        temperatureEl,
-        topPEl,
-    }) => {
+    globals.setUpEventListeners = (chatlog, { chatlogEl, messageEl, submitBtn, newChatBtn, temperatureEl, topPEl }) => {
         submitBtn.addEventListener("click", () => {
             if (receiving) {
                 controller.abort();
@@ -241,7 +234,7 @@
             }
             messageEl.value = start_message;
             messageEl.style.height = "auto";
-            chatlog = new MessageTree();
+            chatlog.rootAlternatives = null;
             chatlog.addMessage({ role: "system", content: first_prompt });
             chatlogEl.update(chatlogToChat(chatlog));
         });
