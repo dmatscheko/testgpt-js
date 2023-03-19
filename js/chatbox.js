@@ -65,8 +65,34 @@ class Chatbox {
 
     // Updates the HTML inside the chat window
     update(chatlog) {
-        const messages = this.#chatlogToChat(chatlog);
+        const should_scroll_down =
+            this.container.parentElement.scrollHeight - this.container.parentElement.clientHeight <=
+            this.container.parentElement.scrollTop + 5;
 
+        this.container.innerHTML = '';
+
+        // Trace the active path through the chatlog
+        let pos = 1;
+        let message = chatlog.getFirstMessage();
+        if (message !== null) message = message.getAnswerMessage(); // Ignore the prompt message
+        while (message !== null) {
+            const messageA = message.value;
+            message = message.getAnswerMessage();
+            const messageB = message !== null ? message.value : { role: 'assistant', content: '🤔...' };
+            this.container.appendChild(this.#formatMessagePairAsRow(messageA, messageB, pos));
+            pos += 2;
+            message = message !== null ? message.getAnswerMessage() : null;
+        }
+        if (this.codebadge) this.codebadge.addTo(this.container);
+
+        if (should_scroll_down) {
+            this.container.parentElement.scrollTop = this.container.parentElement.scrollHeight;
+        }
+    }
+
+
+    // Formats a message pair as HTML
+    #formatMessagePairAsRow(messageObj, answerObj, pos) {
         const optionsEl = this.optionsEl;
         const timeout = this.timeout;
 
@@ -83,58 +109,24 @@ class Chatbox {
             timeout.id = setTimeout(() => { optionsEl.style.display = 'none' }, 1000);
         }
 
-        const should_scroll_down =
-            this.container.parentElement.scrollHeight - this.container.parentElement.clientHeight <=
-            this.container.parentElement.scrollTop + 5;
-
-        this.container.innerHTML = '';
-        let pos = 1;
-        for (const message of messages) {
-            const ping = document.createElement('div');
-            ping.classList.add('ping');
-            const pong = document.createElement('div');
-            pong.classList.add('pong');
-            const row = document.createElement('div');
-            row.classList.add('row');
-            row.appendChild(ping);
-            row.appendChild(pong);
-            [ping.innerHTML, pong.innerHTML] = message;
-            ping.dataset.pos = pos;
-            pos++;
-            pong.dataset.pos = pos;
-            pos++;
-            ping.addEventListener('mouseenter', mouseenter);
-            ping.addEventListener('mouseleave', mouseleave);
-            pong.addEventListener('mouseenter', mouseenter);
-            pong.addEventListener('mouseleave', mouseleave);
-            this.container.appendChild(row);
-        }
-        if (this.codebadge) this.codebadge.addTo(this.container);
-
-        if (should_scroll_down) {
-            this.container.parentElement.scrollTop = this.container.parentElement.scrollHeight;
-        }
-    }
-
-
-    // Formats the active chatlog path as array of pairs of HTML formatted messages
-    #chatlogToChat(chatlog) {
-        let result = [];
-
-        // Trace the active path through the chatlog
-        let message = chatlog.getFirstMessage();
-        if (message !== null) message = message.getAnswerMessage(); // Ignore the prompt message
-        while (message !== null) {
-            const messageObj = message.value;
-            message = message.getAnswerMessage();
-            const answerObj = message !== null ? message.value : { role: 'assistant', content: '🤔...' };
-            result.push([
-                `<small><b>${messageObj.role}</b><br><br></small>${this.#formatCodeBlocks(messageObj.content)}`,
-                `<small><b>${answerObj.role}</b><br><br></small>${this.#formatCodeBlocks(answerObj.content)}`
-            ]);
-            message = message !== null ? message.getAnswerMessage() : null;
-        }
-        return result;
+        const ping = document.createElement('div');
+        ping.classList.add('ping');
+        const pong = document.createElement('div');
+        pong.classList.add('pong');
+        const row = document.createElement('div');
+        row.classList.add('row');
+        row.appendChild(ping);
+        row.appendChild(pong);
+        ping.innerHTML = `<small><b>${messageObj.role}</b><br><br></small>${this.#formatCodeBlocks(messageObj.content)}`;
+        pong.innerHTML = `<small><b>${answerObj.role}</b><br><br></small>${this.#formatCodeBlocks(answerObj.content)}`;
+        ping.dataset.pos = pos;
+        pos++;
+        pong.dataset.pos = pos;
+        ping.addEventListener('mouseenter', mouseenter);
+        ping.addEventListener('mouseleave', mouseleave);
+        pong.addEventListener('mouseenter', mouseenter);
+        pong.addEventListener('mouseleave', mouseleave);
+        return row;
     }
 
 
