@@ -89,9 +89,9 @@ a:hover {
     text-decoration: underline;
 }
 
-/* Settings button and dialog */
+/* New chat button, settings button and dialog */
 
-#settings-btn {
+#buttons {
     position: fixed;
     bottom: 10px;
     right: 10px;

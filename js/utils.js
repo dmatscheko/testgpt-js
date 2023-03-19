@@ -18,10 +18,11 @@
                     content: message
                 };
                 chatlog.addMessage(prompt_msg);
+                chatlog.addMessage(null);
             }
             regenerateLastAnswer = false;
-            chatlog.getFirstMessage().value.content = first_prompt + getDatePrompt();
             chatlogEl.update(chatlog);
+            chatlog.getFirstMessage().value.content = first_prompt + getDatePrompt();
             const payload = {
                 model,
                 messages: chatlog.getActiveMessageValues(),
