@@ -1,4 +1,4 @@
-# testgpt-js
+# gpt-js
 
 An HTML-based chat application that uses the OpenAI API.
 
