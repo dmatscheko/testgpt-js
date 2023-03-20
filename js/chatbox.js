@@ -20,70 +20,9 @@ element.classList.add('hide');
 
 class Chatbox {
     constructor(chatlog, container) {
+        this.chatlog = chatlog;
         this.container = container;
         this.codebadge = new ClipBadge({ autoRun: false });
-
-        const div = document.createElement('div');
-        div.id = 'msg_mod';
-        document.body.appendChild(div);
-        this.optionsEl = div;
-        div.innerHTML =
-            `<button id="msg_mod-prev-btn" title="Previous Message" class="toolbtn small">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M19 7.766c0-1.554-1.696-2.515-3.029-1.715l-7.056 4.234c-1.295.777-1.295 2.653 0 3.43l7.056 4.234c1.333.8 3.029-.16 3.029-1.715V7.766zM9.944 12L17 7.766v8.468L9.944 12zM6 6a1 1 0 0 1 1 1v10a1 1 0 1 1-2 0V7a1 1 0 0 1 1-1z" fill="currentColor"/></svg>
-        </button>
-        <button id="msg_mod-next-btn" title="Next Message" class="toolbtn small">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M5 7.766c0-1.554 1.696-2.515 3.029-1.715l7.056 4.234c1.295.777 1.295 2.653 0 3.43L8.03 17.949c-1.333.8-3.029-.16-3.029-1.715V7.766zM14.056 12L7 7.766v8.468L14.056 12zM18 6a1 1 0 0 1 1 1v10a1 1 0 1 1-2 0V7a1 1 0 0 1 1-1z" fill="currentColor"/></svg>
-        </button><br>
-        <button id="msg_mod-add-btn" title="New Message" class="toolbtn small">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 4a1 1 0 0 1 1 1v6h6a1 1 0 1 1 0 2h-6v6a1 1 0 1 1-2 0v-6H5a1 1 0 1 1 0-2h6V5a1 1 0 0 1 1-1z" fill="currentColor"/></svg>
-        </button>`;
-
-        this.timeout = { id: 0 };
-        const timeout = this.timeout;
-
-        function mouseenter(event) {
-            clearTimeout(timeout.id);
-            div.style.display = 'block';
-        }
-
-        function mouseleave(event) {
-            timeout.id = setTimeout(() => { div.style.display = 'none' }, 1000);
-        }
-
-        div.addEventListener('mouseenter', mouseenter);
-        div.addEventListener('mouseleave', mouseleave);
-
-        document.getElementById('msg_mod-prev-btn').addEventListener('click', () => {
-            chatlog.getNthAlternatives(div.dataset.pos).prev();
-            this.update(chatlog, false);
-        });
-
-        document.getElementById('msg_mod-next-btn').addEventListener('click', () => {
-            chatlog.getNthAlternatives(div.dataset.pos).next();
-            this.update(chatlog, false);
-        });
-
-        document.getElementById('msg_mod-add-btn').addEventListener('click', () => {
-            const alternative = chatlog.getNthAlternatives(div.dataset.pos);
-            if (alternative !== null) alternative.addMessage(null);
-            this.update(chatlog, false);
-            if (parseInt(div.dataset.pos) % 2 === 0) {
-                // Assistant message
-                if (receiving) {
-                    controller.abort();
-                }
-                // Set this global to true, so that the click on submit runs without a message in the input box
-                regenerateLastAnswer = true;
-                document.getElementById("submit-btn").click();
-                const values = chatlog.getActiveMessageValues();
-                return;
-            }
-            document.getElementById("message").focus();
-        });
-
-        document.getElementById("chat-container").addEventListener('scroll', (event) => {
-            div.style.display = 'none';
-        });
     }
 
     // Updates the HTML inside the chat window
@@ -147,34 +86,46 @@ class Chatbox {
 
     // Formats one message as HTML
     #formatMessage(messageObj, type, pos, msgIdx, msgCnt) {
-        const optionsEl = this.optionsEl;
-        const timeout = this.timeout;
-
-        function mouseenter(event) {
-            clearTimeout(timeout.id);
-            const rect = this.getBoundingClientRect();
-            optionsEl.style.display = 'block'; // The element has to be visible first, otherwise clientWidth would be 0
-            optionsEl.style.top = rect.top + 'px';
-            optionsEl.style.left = (rect.left - optionsEl.clientWidth) + 'px';
-            optionsEl.dataset.pos = this.dataset.pos;
-        }
-
-        function mouseleave(event) {
-            timeout.id = setTimeout(() => { optionsEl.style.display = 'none' }, 1000);
-        }
-
         const el = document.createElement('div');
         el.classList.add(type);
 
         let msgStat = ''
-        if (msgIdx > 0 || msgCnt > 1) msgStat = `${msgIdx+1}/${msgCnt} `;
+        if (msgIdx > 0 || msgCnt > 1) msgStat = `<button title="Previous Message" class="msg_mod-prev-btn toolbtn small"><svg width="16" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M19 7.766c0-1.554-1.696-2.515-3.029-1.715l-7.056 4.234c-1.295.777-1.295 2.653 0 3.43l7.056 4.234c1.333.8 3.029-.16 3.029-1.715V7.766zM9.944 12L17 7.766v8.468L9.944 12zM6 6a1 1 0 0 1 1 1v10a1 1 0 1 1-2 0V7a1 1 0 0 1 1-1z" fill="currentColor"/></svg></button>&nbsp;${msgIdx + 1}/${msgCnt}&nbsp;<button title="Next Message" class="msg_mod-next-btn toolbtn small"><svg width="16" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M5 7.766c0-1.554 1.696-2.515 3.029-1.715l7.056 4.234c1.295.777 1.295 2.653 0 3.43L8.03 17.949c-1.333.8-3.029-.16-3.029-1.715V7.766zM14.056 12L7 7.766v8.468L14.056 12zM18 6a1 1 0 0 1 1 1v10a1 1 0 1 1-2 0V7a1 1 0 0 1 1-1z" fill="currentColor"/></svg></button>&nbsp;&nbsp;`;
 
         // Using innerHTML instead of string conatenation prevents breaking the HTML with badly formatted HTML inside the messages
-        el.innerHTML = `<small>${msgStat}<b>${messageObj.role}</b><br><br></small>${this.#formatCodeBlocks(messageObj.content)}`;
-        // if (messageObj.role === 'system') el.classList.add('system');
+        el.innerHTML = `<span class="nobreak"><button title="New Message" class="msg_mod-add-btn toolbtn small"><svg width="16" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 4a1 1 0 0 1 1 1v6h6a1 1 0 1 1 0 2h-6v6a1 1 0 1 1-2 0v-6H5a1 1 0 1 1 0-2h6V5a1 1 0 0 1 1-1z" fill="currentColor"/></svg></button>&nbsp;&nbsp;<small>${msgStat}<b>${messageObj.role}</b></span><br><br></small>${this.#formatCodeBlocks(messageObj.content)}`;
+        if (messageObj.role === 'system') el.classList.add('system');
         el.dataset.pos = pos;
-        el.addEventListener('mouseenter', mouseenter);
-        el.addEventListener('mouseleave', mouseleave);
+
+        el.getElementsByClassName('msg_mod-add-btn')[0].addEventListener('click', () => {
+            const alternative = this.chatlog.getNthAlternatives(el.dataset.pos);
+            if (alternative !== null) alternative.addMessage(null);
+            this.update(this.chatlog, false);
+            if (parseInt(el.dataset.pos) % 2 === 0) {
+                // Assistant message
+                if (receiving) {
+                    controller.abort();
+                }
+                // Set this global to true, so that the click on submit runs without a message in the input box
+                regenerateLastAnswer = true;
+                document.getElementById("submit-btn").click();
+                return;
+            }
+            document.getElementById("message").focus();
+        });
+
+        if (msgIdx > 0 || msgCnt > 1) {
+            el.getElementsByClassName('msg_mod-prev-btn')[0].addEventListener('click', () => {
+                this.chatlog.getNthAlternatives(el.dataset.pos).prev();
+                this.update(this.chatlog, false);
+            });
+
+            el.getElementsByClassName('msg_mod-next-btn')[0].addEventListener('click', () => {
+                this.chatlog.getNthAlternatives(el.dataset.pos).next();
+                this.update(this.chatlog, false);
+            });
+        }
+
         return el;
     }
 

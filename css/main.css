@@ -68,10 +68,12 @@ body {
 }
 
 .toolbtn.small {
-    color: #ddd;
     background-color: #40424f60;
-    width: 30px;
-    height: 27px;
+    border-radius: 4px;
+    padding: 0px;
+    margin: 0px;
+    width: 26px;
+    height: 16px;
 }
 
 /* Source link */
@@ -254,6 +256,12 @@ a:hover {
     border-radius: 5px;
 }
 
+/* Generic parts */
+
+.nobreak {
+    white-space: nowrap;
+}
+
 /* Media types */
 
 #spacer-bottom {
@@ -262,27 +270,23 @@ a:hover {
 }
 
 /* On mobile */
-/* @media only screen and (max-width: 767px) { */
 @media only screen and (max-width: 1037px) {
-    #col-container {
-        max-width: 100%;
-    }
-    /* .only-mobile {
-        display: inline;
-    } */
+
+    /* 767px */
     .only-desktop {
         display: none;
     }
 
+    #col-container {
+        max-width: 100%;
+    }
 }
 
 /* On desktop */
-/* @media only screen and (min-width: 768px) { */
 @media only screen and (min-width: 1038px) {
+
+    /* 768px */
     .only-mobile {
         display: none;
     }
-    /* .only-desktop {
-        display: block;
-    } */
 }
