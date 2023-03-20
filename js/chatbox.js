@@ -74,7 +74,7 @@ class Chatbox {
                 }
                 // Set this global to true, so that the click on submit runs without a message in the input box
                 regenerateLastAnswer = true;
-                document.getElementById("submit").click();
+                document.getElementById("submit-btn").click();
                 const values = chatlog.getActiveMessageValues();
                 return;
             }

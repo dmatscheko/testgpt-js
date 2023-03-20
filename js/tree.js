@@ -136,4 +136,23 @@ class MessageTree {
         }
         return result;
     }
+
+    load(alternative) {
+        const buildAlternatives = (parsedAlt) => {
+            if (!parsedAlt) return null;
+
+            const alt = new Alternatives();
+            alt.activeMessageIndex = parsedAlt.activeMessageIndex;
+
+            for (const parsedMessage of parsedAlt.messages) {
+                const msg = new Message(parsedMessage.value);
+                msg.answerAlternatives = buildAlternatives(parsedMessage.answerAlternatives);
+                alt.messages.push(msg);
+            }
+
+            return alt;
+        };
+
+        this.rootAlternatives = buildAlternatives(alternative);
+    }
 }

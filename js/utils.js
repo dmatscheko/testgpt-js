@@ -98,7 +98,7 @@
     }
 
     // Sets up event listeners for the chat interface
-    globals.setUpEventListeners = (chatlog, { chatlogEl, messageEl, submitBtn, newChatBtn, temperatureEl, topPEl }) => {
+    globals.setUpEventListeners = (chatlog, { chatlogEl, messageEl, submitBtn, newChatBtn, saveChatBtn, loadChatBtn, temperatureEl, topPEl }) => {
         submitBtn.addEventListener("click", () => {
             if (receiving) {
                 controller.abort();
@@ -144,6 +144,44 @@
             chatlog.rootAlternatives = null;
             chatlog.addMessage({ role: "system", content: first_prompt });
             chatlogEl.update(chatlog);
+        });
+
+        saveChatBtn.addEventListener("click", () => {
+            const jsonData = JSON.stringify(chatlog);
+            const blob = new Blob([jsonData], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'chatlog.json';
+            a.style.display = 'none';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        });
+
+        loadChatBtn.addEventListener("click", () => {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = 'application/json';
+            input.style.display = 'none';
+            document.body.appendChild(input);
+
+            input.addEventListener('change', () => {
+              const file = input.files[0];
+              const reader = new FileReader();
+            
+              reader.addEventListener('load', () => {
+                const jsonData = reader.result;
+                const data = JSON.parse(jsonData);
+                chatlog.load(data.rootAlternatives);
+                chatlogEl.update(chatlog);
+              });
+            
+              reader.readAsText(file);
+              document.body.removeChild(input);
+            });
+
+            input.click();
         });
 
         const temperature_val = document.getElementById('temperature-value');
