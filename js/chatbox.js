@@ -1,22 +1,7 @@
 "use strict";
 
+// TODO: Maybe add GPT-model, token and answer price to the title. 
 
-/*
-TODO:
-
-.fade-out {
-  opacity: 1;
-  transition: opacity 1s ease-out;
-}
-
-.fade-out.hide {
-  opacity: 0;
-}
-
-const element = document.querySelector('.fade-out');
-element.classList.add('hide');
-
-*/
 
 class Chatbox {
     constructor(chatlog, container) {
