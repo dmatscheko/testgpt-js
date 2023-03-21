@@ -79,7 +79,7 @@ body {
 /* Source link */
 
 #source {
-    position: fixed;
+    position: absolute;
     bottom: 10px;
     left: 10px;
 }
@@ -122,19 +122,6 @@ a:hover {
 
 #settings p {
     margin: 8px 0px;
-}
-
-/* Message modificator panel */
-
-#msg_mod {
-    display: none;
-    white-space: nowrap;
-    width: fit-content;
-    height: fit-content;
-    font-size: 14px;
-    padding-right: 8px;
-    position: absolute;
-    text-align: right;
 }
 
 /* Chat flow */
