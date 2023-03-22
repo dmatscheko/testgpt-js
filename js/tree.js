@@ -6,6 +6,7 @@
 class Message {
     constructor(value) {
         this.value = value;
+        this.metadata = null;
         this.answerAlternatives = null;
     }
 
@@ -125,6 +126,18 @@ class MessageTree {
         }
         return last;
     }
+
+    // getActiveMessages() {
+    //     let result = [];
+    //     // Trace the active path through the chatlog
+    //     let message = this.getFirstMessage();
+    //     while (message !== null) {
+    //         result.push(message);
+    //         if (message.value === null) break;
+    //         message = message.getAnswerMessage();
+    //     }
+    //     return result;
+    // }
 
     getActiveMessageValues() {
         let result = [];
