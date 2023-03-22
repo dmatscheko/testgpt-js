@@ -12,7 +12,7 @@ If your API key has acces to GPT-4, you can choose that model in the settings.
 
 ### Usage:
 
-You can test it at: [https://huggingface.co/spaces/dma123/testgpt-js](https://huggingface.co/spaces/dma123/testgpt-js).
+You can test it at: [https://huggingface.co/spaces/dma123/gpt-js](https://huggingface.co/spaces/dma123/gpt-js).
 
 You can also run it locally:
 
