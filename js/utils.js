@@ -71,6 +71,9 @@
                 controller = new AbortController();
                 return;
             }
+            if (('' + error).startsWith("Error: You didn't provide an API key.") || ('' + error).startsWith("Error: Incorrect API key provided:")) {
+                getApiKey();
+            }
             if (!entryCreated) {
                 chatlog.addMessage({ role: 'assistant', content: '' + error });
                 entryCreated = true;
@@ -167,18 +170,18 @@
             document.body.appendChild(input);
 
             input.addEventListener('change', () => {
-              const file = input.files[0];
-              const reader = new FileReader();
-            
-              reader.addEventListener('load', () => {
-                const jsonData = reader.result;
-                const data = JSON.parse(jsonData);
-                chatlog.load(data.rootAlternatives);
-                chatlogEl.update(chatlog);
-              });
-            
-              reader.readAsText(file);
-              document.body.removeChild(input);
+                const file = input.files[0];
+                const reader = new FileReader();
+
+                reader.addEventListener('load', () => {
+                    const jsonData = reader.result;
+                    const data = JSON.parse(jsonData);
+                    chatlog.load(data.rootAlternatives);
+                    chatlogEl.update(chatlog);
+                });
+
+                reader.readAsText(file);
+                document.body.removeChild(input);
             });
 
             input.click();
