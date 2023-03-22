@@ -212,7 +212,11 @@
 
         const logout_btn = document.getElementById('logout-btn');
         logout_btn.addEventListener('click', () => {
-            localStorage.removeItem("api_key");
+            try {
+                localStorage.removeItem("api_key");
+            } catch (error) {
+                console.error(error);
+            }
             location.reload();
         });
 
@@ -238,7 +242,11 @@
     globals.getApiKey = () => {
         // If no or an empty API key has been set, then try to get one from localStorage
         if (typeof api_key == 'undefined' || api_key == '') {
-            globals.api_key = localStorage.api_key;
+            try {
+                globals.api_key = localStorage.api_key;
+            } catch (error) {
+                console.error(error);
+            }
             if (typeof api_key != 'undefined' && api_key != '') {
                 showLogoutButton();
                 return;
@@ -250,7 +258,11 @@
         setTimeout(() => {
             globals.api_key = prompt('Enter an OpenAI API key:');
             if (globals.api_key == null) globals.api_key = '';
-            localStorage.api_key = api_key;
+            try {
+                localStorage.api_key = api_key;
+            } catch (error) {
+                console.error(error);
+            }
             if (typeof api_key == 'undefined' || api_key == '') {
                 showLoginButton();
             } else {
