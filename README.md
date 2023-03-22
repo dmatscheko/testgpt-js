@@ -18,10 +18,7 @@ You can also run it locally:
 
 1. Create an OpenAI account at [https://platform.openai.com/account](https://platform.openai.com/account).
 2. Create an API key at [https://platform.openai.com/account/api-keys](https://platform.openai.com/account/api-keys).
-3. Either always enter the API key when you open the testgpt-js page, or create the file js/api_key.js where you put the OpenAI API key like this:
-```js
-const api_key = "sk-6AQdmaPySsomeW2randomCdmaPIkey0HdmaEI";
-```
+3. Enter the API key at the login dialog. This can be called by clicking login at the settings panel (gear button).
 
 ### Screenshot:
 

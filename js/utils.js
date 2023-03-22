@@ -236,9 +236,6 @@
 
 
     globals.getApiKey = () => {
-        // If we need API key handling, we always need the session part
-        document.getElementById("session").style.display = 'block';
-
         // If no or an empty API key has been set, then try to get one from localStorage
         if (typeof api_key == 'undefined' || api_key == '') {
             globals.api_key = localStorage.api_key;
@@ -247,10 +244,11 @@
                 return;
             }
         }
+        showLoginButton();
 
         // If any API key has been set, or localStorage was empty, ask the user for a new API key
         setTimeout(() => {
-            globals.api_key = prompt('Either create the file\njs/api_key.js\nwhere you put the OpenAI API key like this:\nconst api_key = "sk-6AQdmaPySsomeW2randomCdmaPIkey0HdmaEI";\n\nOr always enter the API key (only the sk-6AQdmaPySsomeW2randomCdmaPIkey0HdmaEI) at this prompt:');
+            globals.api_key = prompt('Enter an OpenAI API key:');
             if (globals.api_key == null) globals.api_key = '';
             localStorage.api_key = api_key;
             if (typeof api_key == 'undefined' || api_key == '') {

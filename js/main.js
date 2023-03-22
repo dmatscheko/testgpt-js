@@ -16,13 +16,8 @@
         // Set up event listeners and initialize chat
         setUpEventListeners(chatlog, { chatlogEl, messageEl, submitBtn, newChatBtn, saveChatBtn, loadChatBtn, temperatureEl, topPEl });
 
-        if (typeof api_key == 'undefined' || api_key == '') {
-            // No API key. Get one.
-            getApiKey();
-        } else {
-            // API key has been set via api_key.js
-            document.getElementById("session").style.display = 'none';
-        }
+        // Get API key
+        getApiKey();
 
         // Start new chat
         newChatBtn.click();
