@@ -205,6 +205,60 @@
             settings.classList.toggle('open');
         });
 
+        const login_btn = document.getElementById('login-btn');
+        login_btn.addEventListener('click', () => {
+            getApiKey();
+        });
+
+        const logout_btn = document.getElementById('logout-btn');
+        logout_btn.addEventListener('click', () => {
+            localStorage.removeItem("api_key");
+            location.reload();
+        });
+
+    }
+
+
+    const showLoginButton = () => {
+        const login = document.getElementById('session-login');
+        const logout = document.getElementById('session-logout');
+        login.style.display = 'block';
+        logout.style.display = 'none';
+    }
+
+
+    const showLogoutButton = () => {
+        const login = document.getElementById('session-login');
+        const logout = document.getElementById('session-logout');
+        login.style.display = 'none';
+        logout.style.display = 'block';
+    }
+
+
+    globals.getApiKey = () => {
+        // If we need API key handling, we always need the session part
+        document.getElementById("session").style.display = 'block';
+
+        // If no or an empty API key has been set, then try to get one from localStorage
+        if (typeof api_key == 'undefined' || api_key == '') {
+            globals.api_key = localStorage.api_key;
+            if (typeof api_key != 'undefined' && api_key != '') {
+                showLogoutButton();
+                return;
+            }
+        }
+
+        // If any API key has been set, or localStorage was empty, ask the user for a new API key
+        setTimeout(() => {
+            globals.api_key = prompt('Either create the file\njs/api_key.js\nwhere you put the OpenAI API key like this:\nconst api_key = "sk-6AQdmaPySsomeW2randomCdmaPIkey0HdmaEI";\n\nOr always enter the API key (only the sk-6AQdmaPySsomeW2randomCdmaPIkey0HdmaEI) at this prompt:');
+            if (globals.api_key == null) globals.api_key = '';
+            localStorage.api_key = api_key;
+            if (typeof api_key == 'undefined' || api_key == '') {
+                showLoginButton();
+            } else {
+                showLogoutButton();
+            }
+        }, 0);
     }
 
 

@@ -241,6 +241,12 @@ a:hover {
     background-color: #909090;
 }
 
+/* Session */
+
+#session {
+    text-align: right;
+}
+
 /* Highlight.js additional styles */
 
 .hljs {

@@ -2,15 +2,6 @@
     "use strict";
 
 
-    globals.getApiKey = () => {
-        setTimeout(()=>{
-            globals.api_key = prompt('Either create the file\njs/api_key.js\nwhere you put the OpenAI API key like this:\nconst api_key = "sk-6AQdmaPySsomeW2randomCdmaPIkey0HdmaEI";\n\nOr always enter the API key (only the sk-6AQdmaPySsomeW2randomCdmaPIkey0HdmaEI) at this prompt:');
-            if (globals.api_key == null) globals.api_key = '';
-            localStorage.api_key = api_key;
-        }, 0);
-    }
-
-
     document.addEventListener("DOMContentLoaded", () => {
         const chatlog = new MessageTree();
         const chatlogEl = new Chatbox(chatlog, document.getElementById("chat"));
@@ -25,11 +16,12 @@
         // Set up event listeners and initialize chat
         setUpEventListeners(chatlog, { chatlogEl, messageEl, submitBtn, newChatBtn, saveChatBtn, loadChatBtn, temperatureEl, topPEl });
 
-        globals.api_key = localStorage.api_key;
-
-        // Get API key if it is not defined already
-        if (api_key == '') {
+        if (typeof api_key == 'undefined' || api_key == '') {
+            // No API key. Get one.
             getApiKey();
+        } else {
+            // API key has been set via api_key.js
+            document.getElementById("session").style.display = 'none';
         }
 
         // Start new chat

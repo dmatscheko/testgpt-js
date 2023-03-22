@@ -59,7 +59,7 @@
                     fill="currentColor" />
             </svg>
         </button>
-        <button id="new_chat-btn" title="Restart chat" class="toolbtn">
+        <button id="new_chat-btn" title="Clear chat" class="toolbtn">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path
                     d="M7 4a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v2h4a1 1 0 1 1 0 2h-1.069l-.867 12.142A2 2 0 0 1 17.069 22H6.93a2 2 0 0 1-1.995-1.858L4.07 8H3a1 1 0 0 1 0-2h4V4zm2 2h6V4H9v2zM6.074 8l.857 12H17.07l.857-12H6.074zM10 10a1 1 0 0 1 1 1v6a1 1 0 1 1-2 0v-6a1 1 0 0 1 1-1zm4 0a1 1 0 0 1 1 1v6a1 1 0 1 1-2 0v-6a1 1 0 0 1 1-1z"
@@ -93,6 +93,23 @@
             <label for="user">User</label><br>
             <input type="radio" id="system" name="user_role" value="system">
             <label for="system">System</label>
+        </p>
+        <p>
+            <div id="session">
+                <label>Session</label><br>
+                <div id="session-login">
+                    <label for="login-btn">Login</label>
+                    <button id="login-btn" title="Login" class="toolbtn">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M14 19a1 1 0 1 0 0 2h5a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2h-5a1 1 0 1 0 0 2h5v14h-5z" fill="currentColor"/><path d="M15.714 12.7a.996.996 0 0 0 .286-.697v-.006a.997.997 0 0 0-.293-.704l-4-4a1 1 0 1 0-1.414 1.414L12.586 11H3a1 1 0 1 0 0 2h9.586l-2.293 2.293a1 1 0 1 0 1.414 1.414l4-4 .007-.007z" fill="currentColor"/></svg>
+                    </button>
+                </div>
+                <div id="session-logout">
+                    <label for="logout-btn">Logout</label>
+                    <button id="logout-btn" title="Logout" class="toolbtn">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" clip-rule="evenodd" d="M11 20a1 1 0 0 0-1-1H5V5h5a1 1 0 1 0 0-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h5a1 1 0 0 0 1-1z" fill="currentColor"/><path d="M21.714 12.7a.996.996 0 0 0 .286-.697v-.006a.997.997 0 0 0-.293-.704l-4-4a1 1 0 1 0-1.414 1.414L18.586 11H9a1 1 0 1 0 0 2h9.586l-2.293 2.293a1 1 0 0 0 1.414 1.414l4-4 .007-.007z" fill="currentColor"/></svg>
+                    </button>
+                </div>
+            </div>
         </p>
     </div>
     <script src='js/3rdparty/katex.min.js'></script>
