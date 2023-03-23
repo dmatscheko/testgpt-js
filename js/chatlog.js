@@ -1,7 +1,5 @@
 "use strict";
 
-// TODO: maybe merge message into Alternatives (an Alternatives IS an array of messages with each element a value and again an Alternatives):
-
 
 class Message {
     constructor(value) {
@@ -151,6 +149,7 @@ class MessageTree {
     }
 
     load(alternative) {
+        let msgcount = 0;
         const buildAlternatives = (parsedAlt) => {
             if (!parsedAlt) return null;
 
@@ -161,11 +160,16 @@ class MessageTree {
                 const msg = new Message(parsedMessage.value);
                 msg.answerAlternatives = buildAlternatives(parsedMessage.answerAlternatives);
                 alt.messages.push(msg);
+                msgcount++;
             }
 
             return alt;
         };
 
         this.rootAlternatives = buildAlternatives(alternative);
+
+        // if (msgcount % 2 !== 1) {
+        //     this.addMessage({ role: 'assistant', content: '🤔...' });
+        // }
     }
 }

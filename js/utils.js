@@ -84,6 +84,11 @@
         } finally {
             receiving = false;
             submitBtn.innerHTML = message_submit;
+            try {
+                localStorage.chatlog = JSON.stringify(chatlog);
+            } catch (error) {
+                console.error(error);
+            }
         }
     }
 
@@ -147,6 +152,11 @@
             chatlog.rootAlternatives = null;
             chatlog.addMessage({ role: "system", content: first_prompt });
             chatlogEl.update(chatlog);
+            try {
+                localStorage.chatlog = JSON.stringify(chatlog);
+            } catch (error) {
+                console.error(error);
+            }
         });
 
         saveChatBtn.addEventListener("click", () => {

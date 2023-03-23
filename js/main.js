@@ -19,8 +19,19 @@
         // Get API key
         getApiKey();
 
-        // Start new chat
-        newChatBtn.click();
+        // Load old chat
+        try {
+            const data = JSON.parse(localStorage.chatlog);
+            chatlog.load(data.rootAlternatives);
+            chatlogEl.update(chatlog);
+        } catch (error) {
+            console.error(error);
+        }
+
+        if (chatlog.rootAlternatives == null) {
+            // Start new chat, if no old chat could be loaded
+            newChatBtn.click();
+        }
     });
 
 
