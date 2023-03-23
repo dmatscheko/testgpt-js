@@ -158,6 +158,7 @@ class MessageTree {
 
             for (const parsedMessage of parsedAlt.messages) {
                 const msg = new Message(parsedMessage.value);
+                msg.metadata = parsedMessage.metadata;
                 msg.answerAlternatives = buildAlternatives(parsedMessage.answerAlternatives);
                 alt.messages.push(msg);
                 msgcount++;

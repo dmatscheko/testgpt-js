@@ -60,6 +60,7 @@
                 if (!entryCreated) {
                     chatlog.addMessage({ role: 'assistant', content });
                     entryCreated = true;
+                    chatlog.getLastMessage().metadata = { model, temperature, top_p };
                 } else {
                     chatlog.getLastMessage().value.content += content;
                 }
@@ -84,6 +85,9 @@
         } finally {
             receiving = false;
             submitBtn.innerHTML = message_submit;
+            if (entryCreated) {
+                chatlog.getLastMessage().metadata = { model, temperature, top_p };
+            }
             try {
                 localStorage.chatlog = JSON.stringify(chatlog);
             } catch (error) {

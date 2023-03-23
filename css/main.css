@@ -260,6 +260,10 @@ a:hover {
     white-space: nowrap;
 }
 
+.right {
+    float: right;
+}
+
 /* Media types */
 
 #spacer-bottom {
