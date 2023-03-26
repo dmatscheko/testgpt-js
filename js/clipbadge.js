@@ -35,7 +35,7 @@ class ClipBadge {
         contentSelector: 'body',
         autoRun: true,
         copyIconClass: '',
-        copyIconContent: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M2 4a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v4h4a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H10a2 2 0 0 1-2-2v-4H4a2 2 0 0 1-2-2V4zm8 12v4h10V10h-4v4a2 2 0 0 1-2 2h-4zm4-2V4H4v10h10z" fill="currentColor"/></svg>&nbsp;Copy',
+        copyIconContent: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M2 4a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v4h4a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H10a2 2 0 0 1-2-2v-4H4a2 2 0 0 1-2-2V4zm8 12v4h10V10h-4v4a2 2 0 0 1-2 2h-4zm4-2V4H4v10h10z" fill="currentColor"/></svg>', // &nbsp;Copy
         checkIconClass: 'text-success',
         checkIconContent: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M20.664 5.253a1 1 0 0 1 .083 1.411l-10.666 12a1 1 0 0 1-1.495 0l-5.333-6a1 1 0 0 1 1.494-1.328l4.586 5.159 9.92-11.16a1 1 0 0 1 1.411-.082z" fill="currentColor"/></svg>&nbsp;Copied!',
         onBeforeCodeCopied: null
@@ -51,9 +51,11 @@ class ClipBadge {
         const plaintext = decodeURIComponent(highlightEl.dataset.plaintext) || highlightEl.textContent;
         if (language === 'svg' && plaintext != '') {    // TODO: add tab to view highlighted code
             highlightEl.innerHTML = plaintext;
+        } else if (language == 'table') {
+            language = '';
         }
 
-        if (highlightEl.classList.contains('hljs-nobg')) {
+        if (highlightEl.classList.contains('hljs-message')) {
             language = '';
             const right = highlightEl.querySelector('span > small > span.right');
             if (right !== null) {
@@ -127,7 +129,7 @@ position: absolute;
 right: 0;
 top: 0;
 }
-.hljs-nobg > .clip-badge {
+.hljs-message > .clip-badge {
 border-radius: 0 16px 0 7px;
 }
 .clip-badge.active {
@@ -142,14 +144,16 @@ text-decoration: none;
 }
 .clip-badge-language {
 margin-right: 10px;
+margin-top: 2px;
 font-weight: 600;
 color: goldenrod;
 }
-.hljs-nobg > div > div.clip-badge-language {
+.hljs-message > div > div.clip-badge-language {
 color: white;
 font-weight: 200;
 }
 .clip-badge-copy-icon {
+height: 1.2em;
 font-size: 1em;
 cursor: pointer;
 padding: 0 7px;
@@ -159,8 +163,11 @@ background: #444;
 padding: 5px 8px 5px 8px;
 border-radius: 0 5px 0 7px;
 }
-.hljs-nobg > div > div.clip-badge-copy-icon {
+.hljs-message > div > div.clip-badge-copy-icon {
 border-radius: 0 16px 0 7px;
+}
+.hljs-table > div > div.clip-badge-copy-icon {
+border-radius: 0 4px 0 7px;
 }
 .clip-badge-copy-icon * {
 cursor: pointer;
@@ -187,8 +194,6 @@ color: limegreen !important;
             highlightEls1.forEach(this.addBadge);
             const highlightEls2 = content.querySelectorAll('.hljs-nobg');
             highlightEls2.forEach(this.addBadge);
-            // const svgs = content.querySelectorAll('svg');
-            // svgs.forEach(this.addBadge);
         };
         if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', addAllInternal);
@@ -204,8 +209,6 @@ color: limegreen !important;
             highlightEls1.forEach(this.addBadge);
             const highlightEls2 = container.querySelectorAll('.hljs-nobg');
             highlightEls2.forEach(this.addBadge);
-            // const svgs = container.querySelectorAll('svg');
-            // svgs.forEach(this.addBadge);
         };
         if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', addToInternal);

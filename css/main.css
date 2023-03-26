@@ -219,7 +219,7 @@ a:hover {
     display: block;
 }
 
-#chat svg {
+#chat .hljs > svg {
     max-width: 50%;
     text-align: center;
 }

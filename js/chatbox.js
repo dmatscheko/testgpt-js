@@ -1,7 +1,6 @@
 "use strict";
 
 // TODO: Maybe add token count and answer price to the title.
-// TODO: Add ability to copy table and copy whole message.
 
 // Chatbox display the currently selected message path through a Chatlog
 class Chatbox {
@@ -50,13 +49,48 @@ class Chatbox {
         }
 
         if (this.codebadge) {
-            // prepareTablesAndRemainingSvg();
-
+            this.#prepareTablesAndRemainingSvg();
             this.codebadge.addTo(this.container);
         }
 
         if (should_scroll_down) {
             this.container.parentElement.scrollTop = this.container.parentElement.scrollHeight;
+        }
+    }
+
+    #prepareTablesAndRemainingSvg() {
+        function tableToCSV(table) {
+            const separator = ';';
+            const rows = table.querySelectorAll('tr');
+            const csv = [];
+            for (const rowElement of rows) {
+                const row = [];
+                const cols = rowElement.querySelectorAll('td, th');
+                for (const col of cols) {
+                    let data = col.innerText.replace(/(\r\n|\n|\r)/gm, '').replace(/(\s\s)/gm, ' ');
+                    data = data.replace(/"/g, '""');
+                    row.push(`"${data}"`);
+                }
+                csv.push(row.join(separator));
+            }
+            return csv.join('\n');
+        }
+
+        const tables = this.container.querySelectorAll('table');
+        for (const table of tables) {
+            const div = document.createElement("div");
+            div.classList.add('hljs-nobg');
+            div.classList.add('hljs-table');
+            div.classList.add('language-table');
+            div.dataset.plaintext = encodeURIComponent(tableToCSV(table));
+
+            const bookmark = document.createElement("span");
+            const pe = table.parentElement;
+            pe.insertBefore(bookmark, table);
+            pe.removeChild(table);
+            div.appendChild(table);
+            pe.insertBefore(div, bookmark);
+            pe.removeChild(bookmark);
         }
     }
 
@@ -79,6 +113,7 @@ class Chatbox {
         const el = document.createElement('div');
         el.classList.add(type);
         el.classList.add('hljs-nobg');
+        el.classList.add('hljs-message');
         el.dataset.plaintext = encodeURIComponent(messageObj.value.content.trim());
 
         let msgStat = ''
