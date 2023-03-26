@@ -49,7 +49,11 @@ class Chatbox {
             pos += 2;
         }
 
-        if (this.codebadge) this.codebadge.addTo(this.container);
+        if (this.codebadge) {
+            // prepareTablesAndRemainingSvg();
+
+            this.codebadge.addTo(this.container);
+        }
 
         if (should_scroll_down) {
             this.container.parentElement.scrollTop = this.container.parentElement.scrollHeight;
@@ -74,6 +78,8 @@ class Chatbox {
     #formatMessage(messageObj, type, pos, msgIdx, msgCnt) {
         const el = document.createElement('div');
         el.classList.add(type);
+        el.classList.add('hljs-nobg');
+        el.dataset.plaintext = encodeURIComponent(messageObj.value.content.trim());
 
         let msgStat = ''
         if (msgIdx > 0 || msgCnt > 1) msgStat = `<button title="Previous Message" class="msg_mod-prev-btn toolbtn small"><svg width="16" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M19 7.766c0-1.554-1.696-2.515-3.029-1.715l-7.056 4.234c-1.295.777-1.295 2.653 0 3.43l7.056 4.234c1.333.8 3.029-.16 3.029-1.715V7.766zM9.944 12L17 7.766v8.468L9.944 12zM6 6a1 1 0 0 1 1 1v10a1 1 0 1 1-2 0V7a1 1 0 0 1 1-1z" fill="currentColor"/></svg></button>&nbsp;${msgIdx + 1}/${msgCnt}&nbsp;<button title="Next Message" class="msg_mod-next-btn toolbtn small"><svg width="16" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M5 7.766c0-1.554 1.696-2.515 3.029-1.715l7.056 4.234c1.295.777 1.295 2.653 0 3.43L8.03 17.949c-1.333.8-3.029-.16-3.029-1.715V7.766zM14.056 12L7 7.766v8.468L14.056 12zM18 6a1 1 0 0 1 1 1v10a1 1 0 1 1-2 0V7a1 1 0 0 1 1-1z" fill="currentColor"/></svg></button>&nbsp;&nbsp;`;
@@ -89,6 +95,10 @@ class Chatbox {
         el.dataset.pos = pos;
 
         el.getElementsByClassName('msg_mod-add-btn')[0].addEventListener('click', () => {
+            if (parseInt(el.dataset.pos) % 2 === 1) {
+                const msgBtn = document.getElementById("message");
+                if (msgBtn.value === '') msgBtn.value = decodeURIComponent(el.dataset.plaintext);
+            }
             const alternative = this.chatlog.getNthAlternatives(el.dataset.pos);
             if (alternative !== null) alternative.addMessage(null);
             this.update(this.chatlog, false);
@@ -126,14 +136,6 @@ class Chatbox {
         if (!text) return text;
         text = text.trim();
 
-        // TODO: handle plain svg and tables and whole messages e.g. like below, but do this in wrapper, and check if no parent is already e.g. code:
-        // text = text.replaceAll(/(```\w*\s*<)(svg)(\s.*?<\/)(svg)(>\s*```)/ismg, "$1sXvXg$3sXvXg$5");
-        // text = text.replaceAll(/<svg\s.*?<\/svg>/ismg, (match) => {
-        //     return '```svg\n' + match + '\n```';
-        // });
-        // text = text.replaceAll(/(```\w*\s*<)(sXvXg)(\s.*?<\/)(sXvXg)(>\s*```)/ismg, "$1svg$3svg$5");
-
-
         const defaults = {
             html: false, // Whether to allow HTML tags in the source
             xhtmlOut: false, // Whether to use XHTML-style self-closing tags (e.g. <br />)
@@ -157,12 +159,11 @@ class Chatbox {
                 } catch (error) {
                     console.error(error, code);
                 }
-                return `<pre class="hljs"><code class="${this.langPrefix}${language}" data-plaintext="${encodeURIComponent(code.trim())}">${value}</code></pre>`;
+                return `<pre class="hljs ${this.langPrefix}${language}" data-plaintext="${encodeURIComponent(code.trim())}"><code>${value}</code></pre>`;
             }
         };
         const md = window.markdownit(defaults);
         text = md.render(text);
-
 
         const origFormulas = [];
         function renderMathInString(str) {

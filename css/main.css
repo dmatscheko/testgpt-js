@@ -1,5 +1,4 @@
-html,
-body {
+html, body {
     height: 100%;
     margin: 0;
     padding: 0;
@@ -291,5 +290,34 @@ a:hover {
     /* 768px */
     .only-mobile {
         display: none;
+    }
+}
+
+/* Print */
+@media print {
+    html, body {
+        background-color: #ffffffff;
+    }
+    #chat-container {
+        overflow: visible;
+    }
+    #input-container, #header, #buttons, #settings, #spacer-bottom, #source {
+        display: none;
+    }
+    #col-container {
+        max-width: 100%;
+        width: 100%;
+    }
+    .clip-badge-copy-icon, button {
+        display: none;
+    }
+    #chat>.row>.ping {
+        border: 1px solid #383333;
+    }
+    #chat>.row>.pong {
+        border: 1px solid #333338;
+    }    
+    #chat>.row>.system {
+        border: 1px solid #583333;
     }
 }

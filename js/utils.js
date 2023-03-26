@@ -127,7 +127,7 @@
         });
 
         messageEl.addEventListener("keydown", (event) => {
-            if (event.keyCode === 13 && (event.shiftKey || event.ctrlKey)) {
+            if (event.keyCode === 13 && (event.shiftKey || event.ctrlKey || event.altKey)) {
                 event.preventDefault();
                 submitBtn.click();
             }

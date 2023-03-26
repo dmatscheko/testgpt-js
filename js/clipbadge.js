@@ -43,35 +43,30 @@ class ClipBadge {
 
     #settings = {};
 
+    addBadge = (highlightEl) => { // Should be mostly a pre or div
+        if (highlightEl.classList.contains('clip-badge-pre')) return;
 
-    addBadge = (pre) => {
-        if (pre.classList.contains('clip-badge-pre')) return;
-
-        // const code = pre.querySelector('code') || pre;
-        let code = pre.querySelector('code');
-        if (!code) {    // TODO: remove specialized svg handling by unifying data-plaintext tag with top (.hljs) tag (mostly pre)
-            code = pre;
-            //     const node = document.createElement("div");
-            //     node.appendChild(pre);
-            //     code = pre;
-            //     pre.replaceWith(node);
-            //     pre.classList.add('hljs');
-        }
-
-        const langMatch = code.className.match(/\blanguage-(?<lang>[a-z0-9_-]+)\b/i);
-        const language = langMatch !== null ? langMatch.groups.lang : 'unknown';
-        const badge = this.#settings.template.cloneNode(true);
-        const copyIcon = badge.querySelector('.clip-badge-copy-icon');
-
-        // let text = decodeURIComponent(code.dataset.plaintext) || code.textContent;
-        const plaintext = decodeURIComponent(code.dataset.plaintext);
+        const langMatch = highlightEl.className.match(/\blanguage-(?<lang>[a-z0-9_-]+)\b/i);
+        let language = langMatch !== null ? langMatch.groups.lang : 'unknown';
+        const plaintext = decodeURIComponent(highlightEl.dataset.plaintext) || highlightEl.textContent;
         if (language === 'svg' && plaintext != '') {    // TODO: add tab to view highlighted code
-            code.innerHTML = plaintext;
+            highlightEl.innerHTML = plaintext;
         }
 
+        if (highlightEl.classList.contains('hljs-nobg')) {
+            language = '';
+            const right = highlightEl.querySelector('span > small > span.right');
+            if (right !== null) {
+                language = right.textContent;
+                right.remove();
+            }
+        }
+
+        const badge = this.#settings.template.cloneNode(true);
         badge.classList.add('clip-badge');
         badge.querySelector('.clip-badge-language').textContent = language;
 
+        const copyIcon = badge.querySelector('.clip-badge-copy-icon');
         copyIcon.className = this.#settings.copyIconClass;
         copyIcon.classList.add('clip-badge-copy-icon');
         copyIcon.innerHTML = this.#settings.copyIconContent;
@@ -82,18 +77,11 @@ class ClipBadge {
 
             if (copyIcon.classList.contains('text-success')) return;
 
-            let text = decodeURIComponent(code.dataset.plaintext) || code.textContent;
-
-            // TODO: remove specialized svg handling and add tags with a plaintext version (data-plaintext="...") around every part that can be copied
-            // if (code.tagName.toLowerCase() === 'svg') text = code.outerHTML;
-            // else if (code.firstElementChild && code.firstElementChild.tagName.toLowerCase() === 'svg') text = code.innerHTML;
-            // else if (code.firstElementChild.firstElementChild && code.firstElementChild.firstElementChild.tagName.toLowerCase() === 'svg') text = code.firstElementChild.innerHTML;
-
             if (this.#settings.onBeforeCodeCopied) {
-                text = this.#settings.onBeforeCodeCopied(text, code);
+                plaintext = this.#settings.onBeforeCodeCopied(plaintext, highlightEl);
             }
 
-            const clipboardItem = new ClipboardItem({ 'text/plain': new Blob([text], { type: 'text/plain' }) });
+            const clipboardItem = new ClipboardItem({ 'text/plain': new Blob([plaintext], { type: 'text/plain' }) });
             navigator.clipboard.write([clipboardItem]).then(() => {
                 copyIcon.className = this.#settings.checkIconClass;
                 copyIcon.classList.add('clip-badge-copy-icon');
@@ -107,11 +95,9 @@ class ClipBadge {
             });
         });
 
-        code.classList.add('clip-badge-pre');
-        pre.classList.add('clip-badge-pre');
-        pre.insertAdjacentElement('afterbegin', badge);
+        highlightEl.classList.add('clip-badge-pre');
+        highlightEl.insertAdjacentElement('afterbegin', badge);
     };
-
 
     #getTemplate = () => {
         let node = document.querySelector(this.#settings.templateSelector);
@@ -132,16 +118,17 @@ display: flex;
 flex-flow: row nowrap;
 align-items: flex-start;
 white-space: normal;
-background: #444;
 color: white;
 font-size: 0.875em;
+font-size: 12px;
 opacity: 0.3;
 transition: opacity linear 0.4s;
-border-radius: 0 0 0 7px;
-padding: 5px 8px 5px 8px;
 position: absolute;
 right: 0;
 top: 0;
+}
+.hljs-nobg > .clip-badge {
+border-radius: 0 16px 0 7px;
 }
 .clip-badge.active {
 opacity: 0.8;
@@ -158,12 +145,22 @@ margin-right: 10px;
 font-weight: 600;
 color: goldenrod;
 }
+.hljs-nobg > div > div.clip-badge-language {
+color: white;
+font-weight: 200;
+}
 .clip-badge-copy-icon {
 font-size: 1em;
 cursor: pointer;
 padding: 0 7px;
 margin-top: 2;
 user-select: none;
+background: #444;
+padding: 5px 8px 5px 8px;
+border-radius: 0 5px 0 7px;
+}
+.hljs-nobg > div > div.clip-badge-copy-icon {
+border-radius: 0 16px 0 7px;
 }
 .clip-badge-copy-icon * {
 cursor: pointer;
@@ -175,9 +172,7 @@ color: limegreen !important;
 </style>
 <div class="clip-badge">
 <div class="clip-badge-language"></div>
-<div title="Copy to clipboard">
-<div class="clip-badge-copy-icon"></div>
-</div>
+<div class="clip-badge-copy-icon" title="Copy to clipboard"></div>
 </div>
 `;
         }
@@ -188,8 +183,10 @@ color: limegreen !important;
     addAll = () => {
         const addAllInternal = () => {
             const content = document.querySelector(this.#settings.contentSelector);
-            const pres = content.querySelectorAll('.hljs');
-            pres.forEach(this.addBadge);
+            const highlightEls1 = content.querySelectorAll('.hljs');
+            highlightEls1.forEach(this.addBadge);
+            const highlightEls2 = content.querySelectorAll('.hljs-nobg');
+            highlightEls2.forEach(this.addBadge);
             // const svgs = content.querySelectorAll('svg');
             // svgs.forEach(this.addBadge);
         };
@@ -203,8 +200,10 @@ color: limegreen !important;
 
     addTo = (container) => {
         const addToInternal = () => {
-            const pres = container.querySelectorAll('.hljs');
-            pres.forEach(this.addBadge);
+            const highlightEls1 = container.querySelectorAll('.hljs');
+            highlightEls1.forEach(this.addBadge);
+            const highlightEls2 = container.querySelectorAll('.hljs-nobg');
+            highlightEls2.forEach(this.addBadge);
             // const svgs = container.querySelectorAll('svg');
             // svgs.forEach(this.addBadge);
         };
