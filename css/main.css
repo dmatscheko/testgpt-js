@@ -252,6 +252,7 @@ a:hover {
 .hljs {
     padding: 8px;
     border-radius: 5px;
+    background-color: #282b2e60;
 }
 
 /* Generic parts */

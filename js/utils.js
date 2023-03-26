@@ -57,6 +57,7 @@
                     if ('error' in data) throw new Error(data.error.message);
                     content += data.choices[0].delta.content || '';
                 });
+                
                 if (!entryCreated) {
                     chatlog.addMessage({ role: 'assistant', content });
                     entryCreated = true;
@@ -75,19 +76,22 @@
             if (('' + error).startsWith("Error: You didn't provide an API key.") || ('' + error).startsWith("Error: Incorrect API key provided:")) {
                 getApiKey();
             }
+
             if (!entryCreated) {
                 chatlog.addMessage({ role: 'assistant', content: '' + error });
                 entryCreated = true;
             } else {
                 chatlog.getLastMessage().value.content += `\n\n${error}`;
             }
-            chatlogEl.update(chatlog);
         } finally {
             receiving = false;
             submitBtn.innerHTML = message_submit;
             if (entryCreated) {
                 chatlog.getLastMessage().metadata = { model, temperature, top_p };
             }
+
+            chatlogEl.update(chatlog);
+
             try {
                 localStorage.chatlog = JSON.stringify(chatlog);
             } catch (error) {
@@ -110,6 +114,7 @@
     }
 
     // Sets up event listeners for the chat interface
+    // ChatApp.prototype.setUpEventListeners = () => {
     globals.setUpEventListeners = (chatlog, { chatlogEl, messageEl, submitBtn, newChatBtn, saveChatBtn, loadChatBtn, temperatureEl, topPEl }) => {
         submitBtn.addEventListener("click", () => {
             if (receiving) {

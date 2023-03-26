@@ -3,7 +3,7 @@
 
 
     document.addEventListener("DOMContentLoaded", () => {
-        const chatlog = new MessageTree();
+        const chatlog = new Chatlog();
         const chatlogEl = new Chatbox(chatlog, document.getElementById("chat"));
         const messageEl = document.getElementById("message");
         const submitBtn = document.getElementById("submit-btn");

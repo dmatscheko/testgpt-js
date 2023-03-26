@@ -49,17 +49,25 @@ class ClipBadge {
 
         // const code = pre.querySelector('code') || pre;
         let code = pre.querySelector('code');
-        if (!code) {
-            const node = document.createElement("div");
-            node.appendChild(pre);
+        if (!code) {    // TODO: remove specialized svg handling by unifying data-plaintext tag with top (.hljs) tag (mostly pre)
             code = pre;
-            pre.replaceWith(node);
-            pre.classList.add('hljs');
+            //     const node = document.createElement("div");
+            //     node.appendChild(pre);
+            //     code = pre;
+            //     pre.replaceWith(node);
+            //     pre.classList.add('hljs');
         }
 
-        const language = code.className.replace(/^language-/, '');
+        const langMatch = code.className.match(/\blanguage-(?<lang>[a-z0-9_-]+)\b/i);
+        const language = langMatch !== null ? langMatch.groups.lang : 'unknown';
         const badge = this.#settings.template.cloneNode(true);
         const copyIcon = badge.querySelector('.clip-badge-copy-icon');
+
+        // let text = decodeURIComponent(code.dataset.plaintext) || code.textContent;
+        const plaintext = decodeURIComponent(code.dataset.plaintext);
+        if (language === 'svg' && plaintext != '') {    // TODO: add tab to view highlighted code
+            code.innerHTML = plaintext;
+        }
 
         badge.classList.add('clip-badge');
         badge.querySelector('.clip-badge-language').textContent = language;
@@ -74,11 +82,12 @@ class ClipBadge {
 
             if (copyIcon.classList.contains('text-success')) return;
 
-            let text = code.textContent;
+            let text = decodeURIComponent(code.dataset.plaintext) || code.textContent;
+
             // TODO: remove specialized svg handling and add tags with a plaintext version (data-plaintext="...") around every part that can be copied
-            if (code.tagName.toLowerCase() === 'svg') text = code.outerHTML
-            else if (code.firstElementChild && code.firstElementChild.tagName.toLowerCase() === 'svg') text = code.innerHTML
-            else if (code.firstElementChild.firstElementChild && code.firstElementChild.firstElementChild.tagName.toLowerCase() === 'svg') text = code.firstElementChild.innerHTML;
+            // if (code.tagName.toLowerCase() === 'svg') text = code.outerHTML;
+            // else if (code.firstElementChild && code.firstElementChild.tagName.toLowerCase() === 'svg') text = code.innerHTML;
+            // else if (code.firstElementChild.firstElementChild && code.firstElementChild.firstElementChild.tagName.toLowerCase() === 'svg') text = code.firstElementChild.innerHTML;
 
             if (this.#settings.onBeforeCodeCopied) {
                 text = this.#settings.onBeforeCodeCopied(text, code);
@@ -100,7 +109,7 @@ class ClipBadge {
 
         code.classList.add('clip-badge-pre');
         pre.classList.add('clip-badge-pre');
-        pre.insertBefore(badge, code);
+        pre.insertAdjacentElement('afterbegin', badge);
     };
 
 
@@ -123,11 +132,11 @@ display: flex;
 flex-flow: row nowrap;
 align-items: flex-start;
 white-space: normal;
-background: #333;
+background: #444;
 color: white;
 font-size: 0.875em;
-opacity: 0.5;
-transition: opacity linear 0.5s;
+opacity: 0.3;
+transition: opacity linear 0.4s;
 border-radius: 0 0 0 7px;
 padding: 5px 8px 5px 8px;
 position: absolute;
@@ -179,10 +188,10 @@ color: limegreen !important;
     addAll = () => {
         const addAllInternal = () => {
             const content = document.querySelector(this.#settings.contentSelector);
-            const pres = content.querySelectorAll('pre.hljs');
+            const pres = content.querySelectorAll('.hljs');
             pres.forEach(this.addBadge);
-            const svgs = content.querySelectorAll('svg');
-            svgs.forEach(this.addBadge);
+            // const svgs = content.querySelectorAll('svg');
+            // svgs.forEach(this.addBadge);
         };
         if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', addAllInternal);
@@ -194,8 +203,10 @@ color: limegreen !important;
 
     addTo = (container) => {
         const addToInternal = () => {
-            const pres = container.querySelectorAll('pre.hljs');
+            const pres = container.querySelectorAll('.hljs');
             pres.forEach(this.addBadge);
+            // const svgs = container.querySelectorAll('svg');
+            // svgs.forEach(this.addBadge);
         };
         if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', addToInternal);

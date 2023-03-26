@@ -61,8 +61,8 @@ class Alternatives {
 }
 
 
-// The whole message tree
-class MessageTree {
+// Chatlog is a whole tree of messages
+class Chatlog {
     constructor() {
         this.rootAlternatives = null;
     }

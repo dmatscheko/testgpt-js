@@ -1,8 +1,9 @@
 "use strict";
 
-// TODO: Maybe add GPT-model, token and answer price to the title. 
+// TODO: Maybe add token count and answer price to the title.
+// TODO: Add ability to copy table and copy whole message.
 
-
+// Chatbox display the currently selected message path through a Chatlog
 class Chatbox {
     constructor(chatlog, container) {
         this.chatlog = chatlog;
@@ -82,7 +83,7 @@ class Chatbox {
             model = '&nbsp;<span class="right">' + messageObj.metadata.model + '</span>';
         }
 
-        // Using innerHTML instead of string conatenation prevents breaking the HTML with badly formatted HTML inside the messages
+        // Using innerHTML instead of string concatenation prevents breaking the HTML with badly formatted HTML inside the messages
         el.innerHTML = `<span class="nobreak"><button title="New Message" class="msg_mod-add-btn toolbtn small"><svg width="16" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 4a1 1 0 0 1 1 1v6h6a1 1 0 1 1 0 2h-6v6a1 1 0 1 1-2 0v-6H5a1 1 0 1 1 0-2h6V5a1 1 0 0 1 1-1z" fill="currentColor"/></svg></button>&nbsp;&nbsp;<small>${msgStat}<b>${messageObj.value.role}</b>${model}</span><br><br></small>${this.#formatCodeBlocks(messageObj.value.content)}`;
         if (messageObj.value.role === 'system') el.classList.add('system');
         el.dataset.pos = pos;
@@ -125,10 +126,13 @@ class Chatbox {
         if (!text) return text;
         text = text.trim();
 
-        text = text.replaceAll(/!--MATCH_SVG_A###/ismg, '!-- NO MATCH_SVG_A###'); // partially prevent XSS -- scripts can still be created inside SVGs.
-        text = text.replaceAll(/<svg\s.*?<\/svg>/ismg, (match) => {
-            return '<!--MATCH_SVG_A###' + btoa(unescape(encodeURIComponent(match))) + '###MATCH_SVG_B-->';
-        });
+        // TODO: handle plain svg and tables and whole messages e.g. like below, but do this in wrapper, and check if no parent is already e.g. code:
+        // text = text.replaceAll(/(```\w*\s*<)(svg)(\s.*?<\/)(svg)(>\s*```)/ismg, "$1sXvXg$3sXvXg$5");
+        // text = text.replaceAll(/<svg\s.*?<\/svg>/ismg, (match) => {
+        //     return '```svg\n' + match + '\n```';
+        // });
+        // text = text.replaceAll(/(```\w*\s*<)(sXvXg)(\s.*?<\/)(sXvXg)(>\s*```)/ismg, "$1svg$3svg$5");
+
 
         const defaults = {
             html: false, // Whether to allow HTML tags in the source
@@ -139,26 +143,28 @@ class Chatbox {
             typographer: false, // Whether to use typographic replacements for quotation marks and the like
             _highlight: true, // Whether to syntax-highlight code blocks using highlight.js
             _strict: false, // Whether to enforce strict parsing rules
-            _view: 'html' // The default view mode for the renderer (html | src | debug)
-        };
-        defaults.highlight = function (code, language) {
-            let value = '';
-            try {
-                if (language && hljs.getLanguage(language)) {
-                    value = hljs.highlight(code, { language, ignoreIllegals: true }).value;
-                } else {
-                    const highlighted = hljs.highlightAuto(code);
-                    language = highlighted.language ? highlighted.language : 'unknown';
-                    value = highlighted.value;
+            _view: 'html', // The default view mode for the renderer (html | src | debug)
+            highlight: function (code, language) {
+                let value = '';
+                try {
+                    if (language && hljs.getLanguage(language)) {
+                        value = hljs.highlight(code, { language, ignoreIllegals: true }).value;
+                    } else {
+                        const highlighted = hljs.highlightAuto(code);
+                        language = highlighted.language ? highlighted.language : 'unknown';
+                        value = highlighted.value;
+                    }
+                } catch (error) {
+                    console.error(error, code);
                 }
-            } catch (error) {
-                console.error(error, code);
+                return `<pre class="hljs"><code class="${this.langPrefix}${language}" data-plaintext="${encodeURIComponent(code.trim())}">${value}</code></pre>`;
             }
-            return `<pre class="hljs"><code class="${this.langPrefix}${language}">${value}</code></pre>`;
         };
         const md = window.markdownit(defaults);
         text = md.render(text);
 
+
+        const origFormulas = [];
         function renderMathInString(str) {
             const delimiters = [
                 { left: "$$", right: "$$", display: true },
@@ -174,14 +180,37 @@ class Chatbox {
             const ignoredTags = ['script', 'noscript', 'style', 'textarea', 'pre', 'code', 'option', 'table', 'svg'];
             const wrapper = document.createElement('div');
             wrapper.innerHTML = str;
-            renderMathInElement(wrapper, { delimiters, ignoredTags, throwOnError: false });
+            const preProcess = (math) => {
+                origFormulas.push(math);
+                return math;
+            };
+            renderMathInElement(wrapper, { delimiters, ignoredTags, throwOnError: false, preProcess });
+
+            const elems = wrapper.querySelectorAll('.katex');
+            if (elems.length === origFormulas.length) {
+                for (let i = 0; i < elems.length; i++) {
+                    const formula = elems[i].parentElement;
+                    if (formula.classList.contains('katex-display')) {
+                        const div = document.createElement("div");
+                        const bookmark = document.createElement("span");
+                        const pe = formula.parentElement;
+                        const ppe = pe.parentElement;
+                        ppe.insertBefore(bookmark, pe);
+                        ppe.removeChild(pe);
+                        div.appendChild(pe);
+                        ppe.insertBefore(div, bookmark);
+                        ppe.removeChild(bookmark);
+
+                        div.dataset.plaintext = encodeURIComponent(origFormulas[i].trim());
+                        div.classList.add('hljs');
+                        div.classList.add('language-latex');
+                    }
+                }
+            }
+
             return wrapper.innerHTML;
         }
         text = renderMathInString(text);
-
-        text = text.replaceAll(/(?:<|&lt;)!--MATCH_SVG_A###([A-Za-z0-9\/=%+-]+?)###MATCH_SVG_B--(?:>|&gt;)/ig, (match, p1) => {
-            return decodeURIComponent(escape(atob(p1)));
-        });
 
         return text;
     }
