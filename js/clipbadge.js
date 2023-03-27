@@ -46,13 +46,16 @@ class ClipBadge {
     addBadge = (highlightEl) => { // Should be mostly a pre or div
         if (highlightEl.classList.contains('clip-badge-pre')) return;
 
+        let htmlText = '';
+
         const langMatch = highlightEl.className.match(/\blanguage-(?<lang>[a-z0-9_-]+)\b/i);
         let language = langMatch !== null ? langMatch.groups.lang : 'unknown';
-        const plaintext = decodeURIComponent(highlightEl.dataset.plaintext) || highlightEl.textContent;
-        if (language === 'svg' && plaintext != '') {    // TODO: add tab to view highlighted code
-            highlightEl.innerHTML = plaintext;
+        const plainText = decodeURIComponent(highlightEl.dataset.plaintext) || highlightEl.textContent;
+        if (language === 'svg' && plainText != '') {    // TODO: add tab to view highlighted code
+            highlightEl.innerHTML = plainText;
         } else if (language == 'table') {
             language = '';
+            htmlText = highlightEl.innerHTML;
         }
 
         if (highlightEl.classList.contains('hljs-message')) {
@@ -80,11 +83,14 @@ class ClipBadge {
             if (copyIcon.classList.contains('text-success')) return;
 
             if (this.#settings.onBeforeCodeCopied) {
-                plaintext = this.#settings.onBeforeCodeCopied(plaintext, highlightEl);
+                plainText = this.#settings.onBeforeCodeCopied(plainText, highlightEl);
             }
 
-            const clipboardItem = new ClipboardItem({ 'text/plain': new Blob([plaintext], { type: 'text/plain' }) });
-            navigator.clipboard.write([clipboardItem]).then(() => {
+            const clipboardData = { 'text/plain': new Blob([plainText], { type: 'text/plain' }) };
+            if (htmlText !== '') {
+                clipboardData['text/html'] = new Blob([htmlText], { type: 'text/html' });
+            }
+            navigator.clipboard.write([new ClipboardItem(clipboardData)]).then(() => {
                 copyIcon.className = this.#settings.checkIconClass;
                 copyIcon.classList.add('clip-badge-copy-icon');
                 copyIcon.innerHTML = this.#settings.checkIconContent;
