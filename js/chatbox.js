@@ -84,13 +84,10 @@ class Chatbox {
             div.classList.add('language-table');
             div.dataset.plaintext = encodeURIComponent(tableToCSV(table));
 
-            const bookmark = document.createElement("span");
             const pe = table.parentElement;
-            pe.insertBefore(bookmark, table);
+            pe.insertBefore(div, table);
             pe.removeChild(table);
             div.appendChild(table);
-            pe.insertBefore(div, bookmark);
-            pe.removeChild(bookmark);
         }
     }
 
@@ -125,7 +122,9 @@ class Chatbox {
         }
 
         // Using innerHTML instead of string concatenation prevents breaking the HTML with badly formatted HTML inside the messages
-        el.innerHTML = `<span class="nobreak"><button title="New Message" class="msg_mod-add-btn toolbtn small"><svg width="16" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 4a1 1 0 0 1 1 1v6h6a1 1 0 1 1 0 2h-6v6a1 1 0 1 1-2 0v-6H5a1 1 0 1 1 0-2h6V5a1 1 0 0 1 1-1z" fill="currentColor"/></svg></button>&nbsp;&nbsp;<small>${msgStat}<b>${messageObj.value.role}</b>${model}</span><br><br></small>${this.#formatCodeBlocks(messageObj.value.content)}`;
+        el.innerHTML = `<span class="nobreak"><button title="New Message" class="msg_mod-add-btn toolbtn small"><svg width="16" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 4a1 1 0 0 1 1 1v6h6a1 1 0 1 1 0 2h-6v6a1 1 0 1 1-2 0v-6H5a1 1 0 1 1 0-2h6V5a1 1 0 0 1 1-1z" fill="currentColor"/></svg></button>&nbsp;&nbsp;<small>${msgStat}<b>${messageObj.value.role}</b>${model}</span><br><br></small>`;
+        el.appendChild(this.#formatCodeBlocks(messageObj.value.content));
+
         if (messageObj.value.role === 'system') el.classList.add('system');
         el.dataset.pos = pos;
 
@@ -200,55 +199,53 @@ class Chatbox {
         const md = window.markdownit(defaults);
         text = md.render(text);
 
+        // would be useful, but the created svgs are not standard conform, so it does not make sense
+        // text = text.replaceAll(/!\[([^]+)\]\((data:image\/[;,+%=a-z0-9-]+)\)/gi, '<img src="$2" alt="$1">');
+
+        const delimiters = [
+            { left: "$$", right: "$$", display: true },
+            { left: "$", right: "$", display: false },
+            // { left: "\\(", right: "\\)", display: false },
+            { left: "\\begin{equation}", right: "\\end{equation}", display: true },
+            // { left: "\\begin{align}", right: "\\end{align}", display: true },
+            // { left: "\\begin{alignat}", right: "\\end{alignat}", display: true },
+            // { left: "\\begin{gather}", right: "\\end{gather}", display: true },
+            // { left: "\\begin{CD}", right: "\\end{CD}", display: true },
+            // { left: "\\[", right: "\\]", display: true }
+        ];
+        const ignoredTags = ['script', 'noscript', 'style', 'textarea', 'pre', 'code', 'option', 'table', 'svg'];
         const origFormulas = [];
-        function renderMathInString(str) {
-            const delimiters = [
-                { left: "$$", right: "$$", display: true },
-                { left: "$", right: "$", display: false },
-                // { left: "\\(", right: "\\)", display: false },
-                { left: "\\begin{equation}", right: "\\end{equation}", display: true },
-                // { left: "\\begin{align}", right: "\\end{align}", display: true },
-                // { left: "\\begin{alignat}", right: "\\end{alignat}", display: true },
-                // { left: "\\begin{gather}", right: "\\end{gather}", display: true },
-                // { left: "\\begin{CD}", right: "\\end{CD}", display: true },
-                // { left: "\\[", right: "\\]", display: true }
-            ];
-            const ignoredTags = ['script', 'noscript', 'style', 'textarea', 'pre', 'code', 'option', 'table', 'svg'];
-            const wrapper = document.createElement('div');
-            wrapper.innerHTML = str;
-            const preProcess = (math) => {
-                origFormulas.push(math);
-                return math;
-            };
-            renderMathInElement(wrapper, { delimiters, ignoredTags, throwOnError: false, preProcess });
+        const preProcess = (math) => {
+            origFormulas.push(math);
+            return math;
+        };
 
-            const elems = wrapper.querySelectorAll('.katex');
-            if (elems.length === origFormulas.length) {
-                for (let i = 0; i < elems.length; i++) {
-                    const formula = elems[i].parentElement;
-                    if (formula.classList.contains('katex-display')) {
-                        const div = document.createElement("div");
-                        const bookmark = document.createElement("span");
-                        const pe = formula.parentElement;
-                        const ppe = pe.parentElement;
-                        ppe.insertBefore(bookmark, pe);
-                        ppe.removeChild(pe);
-                        div.appendChild(pe);
-                        ppe.insertBefore(div, bookmark);
-                        ppe.removeChild(bookmark);
+        const wrapper = document.createElement('div');
+        wrapper.classList.add('content');
+        wrapper.innerHTML = text;
 
-                        div.dataset.plaintext = encodeURIComponent(origFormulas[i].trim());
-                        div.classList.add('hljs');
-                        div.classList.add('language-latex');
-                    }
+        renderMathInElement(wrapper, { delimiters, ignoredTags, throwOnError: false, preProcess });
+
+        const elems = wrapper.querySelectorAll('.katex');
+        if (elems.length === origFormulas.length) {
+            for (let i = 0; i < elems.length; i++) {
+                const formula = elems[i].parentElement;
+                if (formula.classList.contains('katex-display')) {
+                    const div = document.createElement("div");
+                    div.classList.add('hljs');
+                    div.classList.add('language-latex');
+                    div.dataset.plaintext = encodeURIComponent(origFormulas[i].trim());
+
+                    const pe = formula.parentElement;
+                    const ppe = pe.parentElement;
+                    ppe.insertBefore(div, pe);
+                    ppe.removeChild(pe);
+                    div.appendChild(pe);
                 }
             }
-
-            return wrapper.innerHTML;
         }
-        text = renderMathInString(text);
 
-        return text;
+        return wrapper;
     }
 
 }
