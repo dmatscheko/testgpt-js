@@ -135,6 +135,7 @@ a:hover {
     flex-direction: column;
     min-height: 200px;
     white-space: pre-wrap;
+    overflow-wrap: break-word;
 }
 
 #chat>.row>.ping {

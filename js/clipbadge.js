@@ -45,13 +45,13 @@ class ClipBadge {
 
     addBadge = (highlightEl) => { // Should be mostly a pre or div
         if (highlightEl.classList.contains('clip-badge-pre')) return;
-
-        let htmlText = '';
-
+        const plainText = decodeURIComponent(highlightEl.dataset.plaintext) || highlightEl.textContent;
         const langMatch = highlightEl.className.match(/\blanguage-(?<lang>[a-z0-9_-]+)\b/i);
         let language = langMatch !== null ? langMatch.groups.lang : 'unknown';
-        const plainText = decodeURIComponent(highlightEl.dataset.plaintext) || highlightEl.textContent;
-        if (language === 'svg' && plainText != '') {    // TODO: add tab to view highlighted code
+        let svgText = '';
+        let htmlText = '';
+        if (language.toLowerCase() === 'svg' && plainText != '') {
+            svgText = highlightEl.innerHTML;
             highlightEl.innerHTML = plainText;
         } else if (language == 'table') {
             language = '';
@@ -70,6 +70,25 @@ class ClipBadge {
         const badge = this.#settings.template.cloneNode(true);
         badge.classList.add('clip-badge');
         badge.querySelector('.clip-badge-language').textContent = language;
+
+        if (svgText !== '') {
+            const swapBtn = badge.querySelector('.clip-badge-swap');
+            swapBtn.classList.add('clip-badge-swap-enabled');
+            swapBtn.dataset.showing = 'html';
+            swapBtn.innerHTML = 'Code';
+            swapBtn.addEventListener('click', (event) => {
+                if (swapBtn.dataset.showing == 'html') {
+                    swapBtn.dataset.showing = 'text';
+                    swapBtn.innerHTML = 'Image';
+                    highlightEl.innerHTML = svgText;
+                } else {
+                    swapBtn.dataset.showing = 'html';
+                    swapBtn.innerHTML = 'Code';
+                    highlightEl.innerHTML = plainText;
+                }
+                highlightEl.insertAdjacentElement('afterbegin', badge);
+            });
+        }
 
         const copyIcon = badge.querySelector('.clip-badge-copy-icon');
         copyIcon.className = this.#settings.copyIconClass;
@@ -163,7 +182,6 @@ height: 1.2em;
 font-size: 1em;
 cursor: pointer;
 padding: 0 7px;
-margin-top: 2;
 user-select: none;
 background: #444;
 padding: 5px 8px 5px 8px;
@@ -182,9 +200,22 @@ vertical-align: top;
 .text-success {
 color: limegreen !important;
 }
+.clip-badge-swap {
+    cursor: pointer;
+    background: #444;
+    border-radius: 0 0 7px 7px;
+    padding: 0 7px;
+    padding-bottom: 3px;
+    margin-right: 5px;
+    display: none;
+}
+.clip-badge-swap-enabled {
+    display: block;
+}
 </style>
 <div class="clip-badge">
 <div class="clip-badge-language"></div>
+<div class="clip-badge-swap" title="Swap view"></div>
 <div class="clip-badge-copy-icon" title="Copy to clipboard"></div>
 </div>
 `;
