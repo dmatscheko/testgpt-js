@@ -123,7 +123,14 @@ class Chatbox {
 
         // Using innerHTML instead of string concatenation prevents breaking the HTML with badly formatted HTML inside the messages
         el.innerHTML = `<span class="nobreak"><button title="New Message" class="msg_mod-add-btn toolbtn small"><svg width="16" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 4a1 1 0 0 1 1 1v6h6a1 1 0 1 1 0 2h-6v6a1 1 0 1 1-2 0v-6H5a1 1 0 1 1 0-2h6V5a1 1 0 0 1 1-1z" fill="currentColor"/></svg></button>&nbsp;&nbsp;<small>${msgStat}<b>${messageObj.value.role}</b>${model}</span><br><br></small>`;
-        el.appendChild(this.#formatCodeBlocks(messageObj.value.content));
+        const formattedEntities = this.#formatCodeBlocks(messageObj.value.content);
+        if (formattedEntities) {
+            el.appendChild(formattedEntities);
+        } else {
+            const div = document.createElement('div');
+            div.innerHTML = 'Error: Timeout on API server.';
+            el.appendChild(div);
+        }
 
         if (messageObj.value.role === 'system') el.classList.add('system');
         el.dataset.pos = pos;
@@ -169,6 +176,8 @@ class Chatbox {
     #formatCodeBlocks(text) {
         if (!text) return text;
         text = text.trim();
+
+        text = text.replaceAll(/```\w*\s*<svg\s/gi, '```svg\n<svg ');
 
         const defaults = {
             html: false, // Whether to allow HTML tags in the source
