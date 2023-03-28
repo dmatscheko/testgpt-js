@@ -16,7 +16,9 @@
 //   onBeforeCodeCopied: (text, code) => {
 //     // Modify the text or code element before copying
 //     return text;
-//   }
+//   },
+//   codeButtonContent: 'Code',
+//   imageButtonContent: 'Image'
 // });
 
 class ClipBadge {
@@ -38,7 +40,9 @@ class ClipBadge {
         copyIconContent: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M2 4a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v4h4a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H10a2 2 0 0 1-2-2v-4H4a2 2 0 0 1-2-2V4zm8 12v4h10V10h-4v4a2 2 0 0 1-2 2h-4zm4-2V4H4v10h10z" fill="currentColor"/></svg>', // &nbsp;Copy
         checkIconClass: 'text-success',
         checkIconContent: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M20.664 5.253a1 1 0 0 1 .083 1.411l-10.666 12a1 1 0 0 1-1.495 0l-5.333-6a1 1 0 0 1 1.494-1.328l4.586 5.159 9.92-11.16a1 1 0 0 1 1.411-.082z" fill="currentColor"/></svg>&nbsp;Copied!',
-        onBeforeCodeCopied: null
+        onBeforeCodeCopied: null,
+        codeButtonContent: 'Code',
+        imageButtonContent: 'Image'
     };
 
     #settings = {};
@@ -75,15 +79,15 @@ class ClipBadge {
             const swapBtn = badge.querySelector('.clip-badge-swap');
             swapBtn.classList.add('clip-badge-swap-enabled');
             swapBtn.dataset.showing = 'html';
-            swapBtn.innerHTML = 'Code';
+            swapBtn.innerHTML = this.#settings.codeButtonContent;
             swapBtn.addEventListener('click', (event) => {
                 if (swapBtn.dataset.showing == 'html') {
                     swapBtn.dataset.showing = 'text';
-                    swapBtn.innerHTML = 'Image';
+                    swapBtn.innerHTML = this.#settings.imageButtonContent;
                     highlightEl.innerHTML = svgText;
                 } else {
                     swapBtn.dataset.showing = 'html';
-                    swapBtn.innerHTML = 'Code';
+                    swapBtn.innerHTML = this.#settings.codeButtonContent;
                     highlightEl.innerHTML = plainText;
                 }
                 highlightEl.insertAdjacentElement('afterbegin', badge);

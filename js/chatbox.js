@@ -18,6 +18,10 @@ class Chatbox {
 
         this.container.innerHTML = '';
 
+        // TODO: Maybe use fragment instead of this.container and update everything in one go.
+        // Also create fragments for each message and cache them
+        // const fragment = document.createDocumentFragment();
+
         // Trace the active path through the chatlog
         let alternative, messageA, messageB, msgIdxA, msgCntA, msgIdxB, msgCntB;
         let pos = 1;
@@ -177,18 +181,23 @@ class Chatbox {
         if (!text) return text;
         text = text.trim();
 
-        text = text.replaceAll(/```\w*\s*<svg\s/gi, '```svg\n<svg ');
+        // To mark all SVG as svg, even when the AI marks it as something else
+        text = text.replaceAll(/```\w*\s*<svg\s/smgi, '```svg\n<svg ');
+        // Add xmlns so that the browser actually shows the image
+        text = text.replaceAll(/\(data:image\/svg\+xml,([a-z0-9_"'%+-]+?)\)/smgi, (match, g1) => {
+            let data = decodeURIComponent(g1);
+            data = data.replace(/<svg\s/smgi, '<?xml version="1.0" encoding="UTF-8"?>\n<svg xmlns="http://www.w3.org/2000/svg" ');
+            return '(data:image/svg+xml,' + encodeURIComponent(data) + ')';
+        });
 
-        const defaults = {
+        const md_settings = {
             html: false, // Whether to allow HTML tags in the source
             xhtmlOut: false, // Whether to use XHTML-style self-closing tags (e.g. <br />)
             breaks: false, // Whether to convert line breaks into <br> tags
             langPrefix: 'language-', // The prefix for CSS classes applied to code blocks
             linkify: true, // Whether to automatically convert URLs to links
             typographer: false, // Whether to use typographic replacements for quotation marks and the like
-            _highlight: true, // Whether to syntax-highlight code blocks using highlight.js
-            _strict: false, // Whether to enforce strict parsing rules
-            _view: 'html', // The default view mode for the renderer (html | src | debug)
+            quotes: `""''`, // Which types of quotes to use, if typographer is true
             highlight: function (code, language) {
                 let value = '';
                 try {
@@ -205,35 +214,43 @@ class Chatbox {
                 return `<pre class="hljs ${this.langPrefix}${language}" data-plaintext="${encodeURIComponent(code.trim())}"><code>${value}</code></pre>`;
             }
         };
-        const md = window.markdownit(defaults);
+        const md = window.markdownit(md_settings);
+        md.validateLink = (link) => {
+            if (link.startsWith('javascript:')) return false;
+            return true;
+        };
+
         text = md.render(text);
 
         // would be useful, but the created svgs are not standard conform, so it does not make sense
         // text = text.replaceAll(/!\[([^]+)\]\((data:image\/[;,+%=a-z0-9-]+)\)/gi, '<img src="$2" alt="$1">');
 
-        const delimiters = [
-            { left: "$$", right: "$$", display: true },
-            { left: "$", right: "$", display: false },
-            // { left: "\\(", right: "\\)", display: false },
-            { left: "\\begin{equation}", right: "\\end{equation}", display: true },
-            // { left: "\\begin{align}", right: "\\end{align}", display: true },
-            // { left: "\\begin{alignat}", right: "\\end{alignat}", display: true },
-            // { left: "\\begin{gather}", right: "\\end{gather}", display: true },
-            // { left: "\\begin{CD}", right: "\\end{CD}", display: true },
-            // { left: "\\[", right: "\\]", display: true }
-        ];
-        const ignoredTags = ['script', 'noscript', 'style', 'textarea', 'pre', 'code', 'option', 'table', 'svg'];
         const origFormulas = [];
-        const preProcess = (math) => {
-            origFormulas.push(math);
-            return math;
+        const kt_settings = {
+            delimiters: [
+                { left: "$$", right: "$$", display: true },
+                { left: "$", right: "$", display: false },
+                // { left: "\\(", right: "\\)", display: false },
+                { left: "\\begin{equation}", right: "\\end{equation}", display: true },
+                // { left: "\\begin{align}", right: "\\end{align}", display: true },
+                // { left: "\\begin{alignat}", right: "\\end{alignat}", display: true },
+                // { left: "\\begin{gather}", right: "\\end{gather}", display: true },
+                // { left: "\\begin{CD}", right: "\\end{CD}", display: true },
+                // { left: "\\[", right: "\\]", display: true }
+            ],
+            ignoredTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code', 'option', 'table', 'svg'],
+            throwOnError: false,
+            preProcess: function (math) {
+                origFormulas.push(math);
+                return math;
+            }
         };
 
         const wrapper = document.createElement('div');
         wrapper.classList.add('content');
         wrapper.innerHTML = text;
 
-        renderMathInElement(wrapper, { delimiters, ignoredTags, throwOnError: false, preProcess });
+        renderMathInElement(wrapper, kt_settings);
 
         const elems = wrapper.querySelectorAll('.katex');
         if (elems.length === origFormulas.length) {

@@ -169,6 +169,7 @@ a:hover {
 
 #chat pre {
     margin: .3em 0px;
+    white-space: pre-wrap;
 }
 
 #chat table {
@@ -220,9 +221,12 @@ a:hover {
     display: block;
 }
 
-#chat .hljs > svg {
+#chat .hljs > svg,
+#chat .content img {
     max-width: 50%;
-    text-align: center;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 /* Scrollbar */
