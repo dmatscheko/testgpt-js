@@ -59,11 +59,13 @@
                 });
                 
                 if (!entryCreated) {
-                    chatlog.addMessage({ role: 'assistant', content });
+                    const lastMessage = chatlog.addMessage({ role: 'assistant', content });
                     entryCreated = true;
-                    chatlog.getLastMessage().metadata = { model, temperature, top_p };
+                    lastMessage.metadata = { model, temperature, top_p };
                 } else {
-                    chatlog.getLastMessage().value.content += content;
+                    const lastMessage = chatlog.getLastMessage();
+                    lastMessage.value.content += content;
+                    lastMessage.cache = null;
                 }
                 chatlogEl.update(chatlog);
             }
@@ -91,12 +93,6 @@
             }
 
             chatlogEl.update(chatlog);
-
-            try {
-                localStorage.chatlog = JSON.stringify(chatlog);
-            } catch (error) {
-                console.error(error);
-            }
         }
     }
 
@@ -161,11 +157,6 @@
             chatlog.rootAlternatives = null;
             chatlog.addMessage({ role: "system", content: first_prompt });
             chatlogEl.update(chatlog);
-            try {
-                localStorage.chatlog = JSON.stringify(chatlog);
-            } catch (error) {
-                console.error(error);
-            }
         });
 
         saveChatBtn.addEventListener("click", () => {

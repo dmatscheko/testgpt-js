@@ -250,6 +250,7 @@ color: limegreen !important;
             highlightEls1.forEach(this.addBadge);
             const highlightEls2 = container.querySelectorAll('.hljs-nobg');
             highlightEls2.forEach(this.addBadge);
+            if (container.classList.contains('hljs') || container.classList.contains('hljs-nobg')) this.addBadge(container);
         };
         if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', addToInternal);

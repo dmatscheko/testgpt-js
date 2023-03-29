@@ -23,7 +23,7 @@ html, body {
     text-align: center;
 }
 
-#header:has(+#chat-container>#chat>.row) {
+#header:has(+#chat-container>#chat>.message) {
     display: none;
 }
 
@@ -44,7 +44,7 @@ html, body {
 }
 
 #input-container textarea {
-    /* #message */
+    /* #message-inp */
     width: 100%;
     resize: none;
     border: 1px solid #20212280;
@@ -138,27 +138,29 @@ a:hover {
     overflow-wrap: break-word;
 }
 
-#chat>.row>.ping {
-    background-color: #383333;
+#chat>.message {
     margin: 8px;
-    margin-left: 40px;
-    margin-right: 0px;
+    margin-bottom: 0px;
     padding: 8px;
     border-radius: 16px;
+}
+
+#chat>.ping {
+    background-color: #383333;
+    margin-left: 40px;
+    margin-right: 0px;
     border-bottom-right-radius: 0px;
 }
 
-#chat>.row>.pong {
+#chat>.pong {
     background-color: #333338;
-    margin: 8px;
     margin-left: 0px;
     margin-right: 40px;
-    padding: 8px;
-    border-radius: 16px;
     border-bottom-left-radius: 0px;
+    margin-bottom: 8px;
 }
 
-#chat>.row>.system {
+#chat>.system {
     background-color: #583333;
 }
 
@@ -316,13 +318,13 @@ a:hover {
     .clip-badge-copy-icon, button {
         display: none;
     }
-    #chat>.row>.ping {
+    #chat>.ping {
         border: 1px solid #383333;
     }
-    #chat>.row>.pong {
+    #chat>.pong {
         border: 1px solid #333338;
     }    
-    #chat>.row>.system {
+    #chat>.system {
         border: 1px solid #583333;
     }
 }

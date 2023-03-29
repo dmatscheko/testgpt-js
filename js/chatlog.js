@@ -5,12 +5,17 @@ class Message {
     constructor(value) {
         this.value = value;
         this.metadata = null;
+        this.cache = null;
         this.answerAlternatives = null;
     }
 
     getAnswerMessage() {
         if (this.answerAlternatives === null) return null;
         return this.answerAlternatives.getActiveMessage();
+    }
+
+    toJSON() {
+        return { value: this.value, metadata: this.metadata, answerAlternatives: this.answerAlternatives };
     }
 }
 
@@ -27,6 +32,9 @@ class Alternatives {
         if (current !== null && current.value === null) {
             current.value = value;
             return current;
+        }
+        for(const msg of this.messages) {
+            msg.cache = null;
         }
         const newMessage = new Message(value);
         this.activeMessageIndex = this.messages.push(newMessage) - 1;

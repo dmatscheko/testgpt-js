@@ -7,7 +7,7 @@ class Chatbox {
     constructor(chatlog, container) {
         this.chatlog = chatlog;
         this.container = container;
-        this.codebadge = new ClipBadge({ autoRun: false });
+        this.clipbadge = new ClipBadge({ autoRun: false });
     }
 
     // Updates the HTML inside the chat window
@@ -16,102 +16,70 @@ class Chatbox {
             (this.container.parentElement.scrollHeight - this.container.parentElement.clientHeight <=
                 this.container.parentElement.scrollTop + 5);
 
-        this.container.innerHTML = '';
+        const fragment = document.createDocumentFragment();
 
-        // TODO: Maybe use fragment instead of this.container and update everything in one go.
-        // Also create fragments for each message and cache them
-        // const fragment = document.createDocumentFragment();
-
-        // Trace the active path through the chatlog
-        let alternative, messageA, messageB, msgIdxA, msgCntA, msgIdxB, msgCntB;
-        let pos = 1;
-        messageB = chatlog.getFirstMessage();
+        // Show the active path through the chatlog
+        // const messages = chatlog.getActiveMessages();
+        let message = chatlog.getFirstMessage();
+        let alternative = null;
+        let lastRole = 'assistant';
+        let pos = 0;
         while (true) {
-            alternative = messageB.answerAlternatives;
+            alternative = message.answerAlternatives;
             if (alternative == null) break;
-            messageA = alternative.getActiveMessage();
-            if (messageA === null) break;
-            msgIdxA = alternative.activeMessageIndex;
-            msgCntA = alternative.messages.length;
-            if (messageA.value === null) {
-                this.container.appendChild(this.#formatMessagePairAsRow({ value: { role: 'user', content: '🤔...' } }, null, pos, msgIdxA, msgCntA, 0, 0));
+            message = alternative.getActiveMessage();
+            if (message === null) break;
+
+            if (message.cache !== null) {
+                fragment.appendChild(message.cache);
+                lastRole = message.value.role;
+                pos++;
+                continue;
+            }
+
+            const msgIdx = alternative.activeMessageIndex;
+            const msgCnt = alternative.messages.length;
+            pos++;
+
+            if (message.value === null) {
+                let role = 'assistant';
+                if (lastRole === 'assistant') role = 'user';
+                const messageEl = this.#formatMessage({ value: { role, content: '🤔...' } }, pos, msgIdx, msgCnt);
+                fragment.appendChild(messageEl);
                 break;
             }
 
-            alternative = messageA.answerAlternatives;
-            messageB = alternative !== null ? alternative.getActiveMessage() : null;
-            if (messageB === null) break;
-            msgIdxB = alternative.activeMessageIndex;
-            msgCntB = alternative.messages.length;
-            if (messageB.value === null) {
-                this.container.appendChild(this.#formatMessagePairAsRow(messageA, { value: { role: 'assistant', content: '🤔...' } }, pos, msgIdxA, msgCntA, msgIdxB, msgCntB));
+            if (message.value.content === null) {
+                const messageEl = this.#formatMessage({ value: { role: message.value.role, content: '🤔...' } }, pos, msgIdx, msgCnt);
+                fragment.appendChild(messageEl);
                 break;
             }
 
-            this.container.appendChild(this.#formatMessagePairAsRow(messageA, messageB, pos, msgIdxA, msgCntA, msgIdxB, msgCntB));
-            pos += 2;
+            const messageEl = this.#formatMessage(message, pos, msgIdx, msgCnt);
+            fragment.appendChild(messageEl);
+            message.cache = messageEl;
+            lastRole = message.value.role;
         }
 
-        if (this.codebadge) {
-            this.#prepareTablesAndRemainingSvg();
-            this.codebadge.addTo(this.container);
-        }
+        this.container.replaceChildren(fragment);
 
         if (should_scroll_down) {
             this.container.parentElement.scrollTop = this.container.parentElement.scrollHeight;
         }
-    }
 
-    #prepareTablesAndRemainingSvg() {
-        function tableToCSV(table) {
-            const separator = ';';
-            const rows = table.querySelectorAll('tr');
-            const csv = [];
-            for (const rowElement of rows) {
-                const row = [];
-                const cols = rowElement.querySelectorAll('td, th');
-                for (const col of cols) {
-                    let data = col.innerText.replace(/(\r\n|\n|\r)/gm, '').replace(/(\s\s)/gm, ' ');
-                    data = data.replace(/"/g, '""');
-                    row.push(`"${data}"`);
-                }
-                csv.push(row.join(separator));
-            }
-            return csv.join('\n');
-        }
-
-        const tables = this.container.querySelectorAll('table');
-        for (const table of tables) {
-            const div = document.createElement("div");
-            div.classList.add('hljs-nobg');
-            div.classList.add('hljs-table');
-            div.classList.add('language-table');
-            div.dataset.plaintext = encodeURIComponent(tableToCSV(table));
-
-            const pe = table.parentElement;
-            pe.insertBefore(div, table);
-            pe.removeChild(table);
-            div.appendChild(table);
+        try {
+            localStorage.chatlog = JSON.stringify(chatlog);
+        } catch (error) {
+            console.error(error);
         }
     }
-
-
-    // Formats a message pair as HTML
-    #formatMessagePairAsRow(messageA, messageB, pos, msgIdxA, msgCntA, msgIdxB, msgCntB) {
-        const row = document.createElement('div');
-        row.classList.add('row');
-        const ping = this.#formatMessage(messageA, 'ping', pos, msgIdxA, msgCntA);
-        row.appendChild(ping);
-        if (messageB === null) return row;
-        const pong = this.#formatMessage(messageB, 'pong', pos + 1, msgIdxB, msgCntB);
-        row.appendChild(pong);
-        return row;
-    }
-
 
     // Formats one message as HTML
-    #formatMessage(messageObj, type, pos, msgIdx, msgCnt) {
+    #formatMessage(messageObj, pos, msgIdx, msgCnt) {
+        let type = 'ping';
+        if (messageObj.value.role === 'assistant') type = 'pong';
         const el = document.createElement('div');
+        el.classList.add('message');
         el.classList.add(type);
         el.classList.add('hljs-nobg');
         el.classList.add('hljs-message');
@@ -140,9 +108,9 @@ class Chatbox {
         el.dataset.pos = pos;
 
         el.getElementsByClassName('msg_mod-add-btn')[0].addEventListener('click', () => {
+            const messageInp = document.getElementById("message-inp");
             if (parseInt(el.dataset.pos) % 2 === 1) {
-                const msgBtn = document.getElementById("message");
-                if (msgBtn.value === '') msgBtn.value = decodeURIComponent(el.dataset.plaintext);
+                if (messageInp.value === '') messageInp.value = decodeURIComponent(el.dataset.plaintext);
             }
             const alternative = this.chatlog.getNthAlternatives(el.dataset.pos);
             if (alternative !== null) alternative.addMessage(null);
@@ -157,7 +125,7 @@ class Chatbox {
                 document.getElementById("submit-btn").click();
                 return;
             }
-            document.getElementById("message").focus();
+            messageInp.focus();
         });
 
         if (msgIdx > 0 || msgCnt > 1) {
@@ -172,9 +140,48 @@ class Chatbox {
             });
         }
 
+        if (this.clipbadge) {
+            this.#prepareTablesAndRemainingSvg(el);
+            this.clipbadge.addTo(el);
+        }
+
         return el;
     }
 
+    #prepareTablesAndRemainingSvg(parent) {
+        function tableToCSV(table) {
+            const separator = ';';
+            const rows = table.querySelectorAll('tr');
+            const csv = [];
+            for (const rowElement of rows) {
+                const row = [];
+                const cols = rowElement.querySelectorAll('td, th');
+                for (const col of cols) {
+                    let data = col.innerText.replace(/(\r\n|\n|\r)/gm, '').replace(/(\s\s)/gm, ' ');
+                    data = data.replace(/"/g, '""');
+                    row.push(`"${data}"`);
+                }
+                csv.push(row.join(separator));
+            }
+            return csv.join('\n');
+        }
+
+        const tables = parent.querySelectorAll('table');
+        for (const table of tables) {
+            const div = document.createElement("div");
+            div.classList.add('hljs-nobg');
+            div.classList.add('hljs-table');
+            div.classList.add('language-table');
+            div.dataset.plaintext = encodeURIComponent(tableToCSV(table));
+
+            // div.appendChild(table);
+            // table.replaceWith(div);
+            const pe = table.parentElement;
+            pe.insertBefore(div, table);
+            pe.removeChild(table);
+            div.appendChild(table);
+        }
+    }
 
     // Adds syntax highlighting and renders latex formulas to all code blocks in a message
     #formatCodeBlocks(text) {
@@ -263,6 +270,8 @@ class Chatbox {
                     div.dataset.plaintext = encodeURIComponent(origFormulas[i].trim());
 
                     const pe = formula.parentElement;
+                    // div.appendChild(pe);
+                    // pe.replaceWith(div);
                     const ppe = pe.parentElement;
                     ppe.insertBefore(div, pe);
                     ppe.removeChild(pe);

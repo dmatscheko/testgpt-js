@@ -5,7 +5,7 @@
     document.addEventListener("DOMContentLoaded", () => {
         const chatlog = new Chatlog();
         const chatlogEl = new Chatbox(chatlog, document.getElementById("chat"));
-        const messageEl = document.getElementById("message");
+        const messageEl = document.getElementById("message-inp");
         const submitBtn = document.getElementById("submit-btn");
         const newChatBtn = document.getElementById("new_chat-btn");
         const saveChatBtn = document.getElementById("save_chat-btn");
