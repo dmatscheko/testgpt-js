@@ -64,7 +64,7 @@ class ClipBadge {
 
         if (highlightEl.classList.contains('hljs-message')) {
             language = '';
-            const right = highlightEl.querySelector('span > small > span.right');
+            const right = highlightEl.querySelector('small > span > span.right');
             if (right !== null) {
                 language = right.textContent;
                 right.remove();
