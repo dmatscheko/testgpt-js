@@ -189,4 +189,8 @@ class Chatlog {
 
         this.rootAlternatives = buildAlternatives(alternative);
     }
+
+    clearCache() {
+        this.load(this.rootAlternatives);
+    }
 }
