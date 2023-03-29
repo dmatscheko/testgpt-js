@@ -164,6 +164,15 @@ a:hover {
     background-color: #583333;
 }
 
+#chat .avatar {
+    width: 32px;
+    height: 32px;
+    object-fit: cover;
+    float: left;
+    margin-right: 8px;
+    border-radius: 3px;
+}
+
 #chat p {
     margin-block-start: .3em;
     margin-block-end: .3em;
