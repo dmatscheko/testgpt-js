@@ -121,8 +121,9 @@ class Chatbox {
                 if (receiving) {
                     controller.abort();
                 }
+                // SetTimeout because of race condition with controller.abort(). Probably not the best solution
                 setTimeout(() => {
-                    // Set this global to true, so that the click on submit runs without a message in the input box
+                    // Set this globally to true, so that the click on submit can run without a message in the input box
                     regenerateLastAnswer = true;
                     document.getElementById("submit-btn").click();
                 }, 100);
