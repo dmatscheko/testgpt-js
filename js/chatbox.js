@@ -156,14 +156,17 @@ class Chatbox {
         const avatar = document.createElement('img');
         let avatarSrc = undefined;
         let avatarFromLocalStorage = false;
+        let canUselocalStorage = true;
         try {
             avatarSrc = localStorage.getItem(`${type}Avatar`);
             avatarFromLocalStorage = avatarSrc !== null;
         } catch (error) {
+            canUselocalStorage = false;
             console.error(error);
         }
         avatar.src = avatarSrc || 'data:image/svg+xml,' + encodeURIComponent(type === 'ping' ? avatar_ping : avatar_pong);
         avatar.addEventListener('click', () => {
+            if (!canUselocalStorage) return;
             if (avatarFromLocalStorage) {
                 const original = 'data:image/svg+xml,' + encodeURIComponent(type === 'ping' ? avatar_ping : avatar_pong);
                 avatar.src = original;
