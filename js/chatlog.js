@@ -33,9 +33,7 @@ class Alternatives {
             current.value = value;
             return current;
         }
-        for(const msg of this.messages) {
-            msg.cache = null;
-        }
+        this.clearCache();
         const newMessage = new Message(value);
         this.activeMessageIndex = this.messages.push(newMessage) - 1;
         return newMessage;
@@ -50,11 +48,15 @@ class Alternatives {
 
     getActiveMessage() {
         if (this.activeMessageIndex === -1) return null;
-        return this.messages[this.activeMessageIndex];
+        return this.messages[this.activeMessageIndex] || null;
     }
 
     next() {
         if (this.activeMessageIndex === -1) return null;
+        if (this.messages[this.activeMessageIndex] === null || this.messages[this.activeMessageIndex].value === null) {
+            this.messages.splice(this.activeMessageIndex, 1);
+            this.clearCache();
+        }
         this.activeMessageIndex++;
         if (this.activeMessageIndex > this.messages.length - 1) this.activeMessageIndex = 0;
         return this.messages[this.activeMessageIndex];
@@ -62,9 +64,19 @@ class Alternatives {
 
     prev() {
         if (this.activeMessageIndex === -1) return null;
+        if (this.messages[this.activeMessageIndex] === null || this.messages[this.activeMessageIndex].value === null) {
+            this.messages.splice(this.activeMessageIndex, 1);
+            this.clearCache();
+        }
         this.activeMessageIndex--;
         if (this.activeMessageIndex < 0) this.activeMessageIndex = this.messages.length - 1;
         return this.messages[this.activeMessageIndex];
+    }
+
+    clearCache() {
+        for (const msg of this.messages) {
+            if (msg !== null && msg !== undefined) msg.cache = null;
+        }
     }
 }
 
@@ -176,9 +188,5 @@ class Chatlog {
         };
 
         this.rootAlternatives = buildAlternatives(alternative);
-
-        // if (msgcount % 2 !== 1) {
-        //     this.addMessage({ role: 'assistant', content: '🤔...' });
-        // }
     }
 }

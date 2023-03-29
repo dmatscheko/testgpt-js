@@ -8,6 +8,17 @@
         if (receiving) return;
         receiving = true;
 
+        if (user_role === 'assistant') {
+            const prompt_msg = {
+                role: user_role,
+                content: message
+            };
+            chatlog.addMessage(prompt_msg);
+            chatlogEl.update(chatlog);
+            receiving = false;
+            return;
+        }
+
         submitBtn.innerHTML = message_stop;
         let entryCreated = false;
         try {

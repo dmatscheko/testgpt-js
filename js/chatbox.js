@@ -107,22 +107,24 @@ class Chatbox {
         if (messageObj.value.role === 'system') el.classList.add('system');
         el.dataset.pos = pos;
 
-        el.getElementsByClassName('msg_mod-add-btn')[0].addEventListener('click', () => {
+        el.getElementsByClassName('msg_mod-add-btn')[0].addEventListener('click', async () => {
             const messageInp = document.getElementById("message-inp");
-            if (parseInt(el.dataset.pos) % 2 === 1) {
+            if (type === 'ping') {
                 if (messageInp.value === '') messageInp.value = decodeURIComponent(el.dataset.plaintext);
             }
-            const alternative = this.chatlog.getNthAlternatives(el.dataset.pos);
+            const alternative = this.chatlog.getNthAlternatives(pos);
             if (alternative !== null) alternative.addMessage(null);
             this.update(this.chatlog, false);
-            if (parseInt(el.dataset.pos) % 2 === 0) {
+            if (type === 'pong') {
                 // Assistant message
                 if (receiving) {
                     controller.abort();
                 }
-                // Set this global to true, so that the click on submit runs without a message in the input box
-                regenerateLastAnswer = true;
-                document.getElementById("submit-btn").click();
+                setTimeout(() => {
+                    // Set this global to true, so that the click on submit runs without a message in the input box
+                    regenerateLastAnswer = true;
+                    document.getElementById("submit-btn").click();
+                }, 100);
                 return;
             }
             messageInp.focus();
