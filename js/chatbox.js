@@ -164,7 +164,10 @@ class Chatbox {
             canUselocalStorage = false;
             console.error(error);
         }
+        avatar.classList.add('avatar');
+        if (canUselocalStorage) avatar.classList.add('clickable');
         avatar.src = avatarSrc || 'data:image/svg+xml,' + encodeURIComponent(type === 'ping' ? avatar_ping : avatar_pong);
+
         avatar.addEventListener('click', () => {
             if (!canUselocalStorage) return;
             if (avatarFromLocalStorage) {
@@ -199,7 +202,6 @@ class Chatbox {
             });
             input.click();
         });
-        avatar.classList.add('avatar');
 
         return avatar;
     }

@@ -280,6 +280,10 @@ a:hover {
     float: right;
 }
 
+.clickable {
+    cursor: pointer;
+}
+
 /* Media types */
 
 #spacer-bottom {
