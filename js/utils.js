@@ -1,5 +1,5 @@
 (function (globals) {
-    "use strict";
+    'use strict';
 
 
     // Interact with OpenAI API
@@ -55,14 +55,14 @@
                 const { done, value } = await reader.read();
                 if (done) break;
                 const value_str = new TextDecoder().decode(value);
-                if (value_str.startsWith("{")) {
+                if (value_str.startsWith('{')) {
                     const data = JSON.parse(value_str);
                     if ('error' in data) throw new Error(data.error.message);
                 }
                 const chunks = value_str.split('\n');
                 let content = '';
                 chunks.forEach(chunk => {
-                    if (chunk.startsWith("data: ")) chunk = chunk.substring(6)
+                    if (chunk.startsWith('data: ')) chunk = chunk.substring(6)
                     if (chunk === '' || chunk === '[DONE]') return;
                     const data = JSON.parse(chunk);
                     if ('error' in data) throw new Error(data.error.message);
@@ -86,7 +86,7 @@
                 controller = new AbortController();
                 return;
             }
-            if (('' + error).startsWith("Error: You didn't provide an API key.") || ('' + error).startsWith("Error: Incorrect API key provided:")) {
+            if (('' + error).startsWith("Error: You didn't provide an API key.") || ('' + error).startsWith('Error: Incorrect API key provided:')) {
                 getApiKey();
             }
 
@@ -124,54 +124,54 @@
     // ChatApp.prototype.setUpEventListeners = () => {
     globals.setUpEventListeners = (chatlog, ui) => {
 
-        ui.submitBtn.addEventListener("click", () => {
+        ui.submitBtn.addEventListener('click', () => {
             if (receiving) {
                 controller.abort();
                 return;
             }
             openaiChat(ui.messageEl.value, chatlog, document.querySelector('input[name="model"]:checked').value, Number(ui.temperatureEl.value), Number(ui.topPEl.value), document.querySelector('input[name="user_role"]:checked').value, ui);
-            ui.messageEl.value = "";
-            ui.messageEl.style.height = "auto";
+            ui.messageEl.value = '';
+            ui.messageEl.style.height = 'auto';
         });
 
-        ui.messageEl.addEventListener("keydown", (event) => {
+        ui.messageEl.addEventListener('keydown', (event) => {
             if (event.keyCode === 13 && (event.shiftKey || event.ctrlKey || event.altKey)) {
                 event.preventDefault();
                 ui.submitBtn.click();
             }
         });
 
-        ui.messageEl.addEventListener("input", function () {
-            this.style.height = "auto";
+        ui.messageEl.addEventListener('input', function () {
+            this.style.height = 'auto';
             let height = this.scrollHeight - parseInt(getComputedStyle(this).paddingTop) - parseInt(getComputedStyle(this).paddingBottom);
             if (height > window.innerHeight / 2) {
                 height = window.innerHeight / 2;
-                this.style.overflowY = "scroll";
+                this.style.overflowY = 'scroll';
             } else {
-                this.style.overflowY = "hidden";
+                this.style.overflowY = 'hidden';
             }
             if (height > this.clientHeight) this.style.height = `${height}px`;
         });
 
         document.addEventListener('keydown', function (event) {
-            if (event.key === "Escape") {
+            if (event.key === 'Escape') {
                 controller.abort();
             }
         });
 
-        ui.newChatBtn.addEventListener("click", () => {
+        ui.newChatBtn.addEventListener('click', () => {
             if (receiving) {
                 controller.abort();
                 return;
             }
             ui.messageEl.value = start_message;
-            ui.messageEl.style.height = "auto";
+            ui.messageEl.style.height = 'auto';
             chatlog.rootAlternatives = null;
-            chatlog.addMessage({ role: "system", content: first_prompt });
+            chatlog.addMessage({ role: 'system', content: first_prompt });
             ui.chatlogEl.update();
         });
 
-        ui.saveChatBtn.addEventListener("click", () => {
+        ui.saveChatBtn.addEventListener('click', () => {
             const jsonData = JSON.stringify(chatlog);
             const blob = new Blob([jsonData], { type: 'application/json' });
             const url = URL.createObjectURL(blob);
@@ -184,7 +184,7 @@
             document.body.removeChild(a);
         });
 
-        ui.loadChatBtn.addEventListener("click", () => {
+        ui.loadChatBtn.addEventListener('click', () => {
             const input = document.createElement('input');
             input.type = 'file';
             input.accept = 'application/json';
@@ -229,7 +229,7 @@
 
         ui.logoutBtn.addEventListener('click', () => {
             try {
-                localStorage.removeItem("api_key");
+                localStorage.removeItem('api_key');
             } catch (error) {
                 console.error(error);
             }

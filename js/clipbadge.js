@@ -1,4 +1,4 @@
-"use strict";
+'use strict';
 
 // a heavily modified version of this:
 // https://unpkg.com/highlightjs-badge@0.1.9/highlightjs-badge.js
@@ -133,7 +133,7 @@ class ClipBadge {
     #getTemplate = () => {
         let node = document.querySelector(this.#settings.templateSelector);
         if (!node) {
-            node = document.createElement("template");
+            node = document.createElement('template');
             node.innerHTML = `
 <style>
 .clip-badge-pre {
@@ -262,7 +262,7 @@ color: limegreen !important;
 
     #init = () => {
         const node = this.#getTemplate();
-        const style = node.content.querySelector("style").cloneNode(true);
+        const style = node.content.querySelector('style').cloneNode(true);
         const template = node.content.querySelector('.clip-badge').cloneNode(true);
         document.head.appendChild(style);
         this.#settings.template = template;

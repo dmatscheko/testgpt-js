@@ -1,4 +1,4 @@
-"use strict";
+'use strict';
 
 // This allows to abort the streaming of the answer
 let controller = new AbortController();
