@@ -123,7 +123,6 @@
     // Sets up event listeners for the chat interface
     // ChatApp.prototype.setUpEventListeners = () => {
     globals.setUpEventListeners = (chatlog, ui) => {
-        // { ui.chatlogEl, ui.messageEl, ui.submitBtn, ui.newChatBtn, ui.saveChatBtn, ui.loadChatBtn, ui.temperatureEl, ui.topPEl }
 
         ui.submitBtn.addEventListener("click", () => {
             if (receiving) {
