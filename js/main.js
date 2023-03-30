@@ -11,12 +11,12 @@
             newChatBtn: document.getElementById("new_chat-btn"),
             saveChatBtn: document.getElementById("save_chat-btn"),
             loadChatBtn: document.getElementById("load_chat-btn"),
-            temperatureEl: document.getElementById("temperature"),
-            topPEl: document.getElementById("top_p"),
-            temperatureValueEl: document.getElementById('temperature-value'),
-            topPValueEl: document.getElementById('top-p-value'),
             settingsBtn: document.getElementById('settings-btn'),
             settingsEl: document.getElementById('settings'),
+            temperatureEl: document.getElementById("temperature"),
+            temperatureValueEl: document.getElementById('temperature-value'),
+            topPEl: document.getElementById("top_p"),
+            topPValueEl: document.getElementById('top_p-value'),
             loginBtn: document.getElementById('login-btn'),
             logoutBtn: document.getElementById('logout-btn')
         };
