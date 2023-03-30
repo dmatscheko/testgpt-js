@@ -11,7 +11,7 @@ class Chatbox {
     }
 
     // Updates the HTML inside the chat window
-    update(chatlog, scroll = true) {
+    update(scroll = true) {
         const should_scroll_down = scroll &&
             (this.container.parentElement.scrollHeight - this.container.parentElement.clientHeight <=
                 this.container.parentElement.scrollTop + 5);
@@ -19,8 +19,7 @@ class Chatbox {
         const fragment = document.createDocumentFragment();
 
         // Show the active path through the chatlog
-        // const messages = chatlog.getActiveMessages();
-        let message = chatlog.getFirstMessage();
+        let message = this.chatlog.getFirstMessage();
         let alternative = null;
         let lastRole = 'assistant';
         let pos = 0;
@@ -68,7 +67,7 @@ class Chatbox {
         }
 
         try {
-            localStorage.chatlog = JSON.stringify(chatlog);
+            localStorage.chatlog = JSON.stringify(this.chatlog);
         } catch (error) {
             console.error(error);
         }
@@ -115,7 +114,7 @@ class Chatbox {
             }
             const alternative = this.chatlog.getNthAlternatives(pos);
             if (alternative !== null) alternative.addMessage(null);
-            this.update(this.chatlog, false);
+            this.update(false);
             if (type === 'pong') {
                 // Assistant message
                 if (receiving) {
@@ -135,12 +134,12 @@ class Chatbox {
         if (msgIdx > 0 || msgCnt > 1) {
             el.getElementsByClassName('msg_mod-prev-btn')[0].addEventListener('click', () => {
                 this.chatlog.getNthAlternatives(el.dataset.pos).prev();
-                this.update(this.chatlog, false);
+                this.update(false);
             });
 
             el.getElementsByClassName('msg_mod-next-btn')[0].addEventListener('click', () => {
                 this.chatlog.getNthAlternatives(el.dataset.pos).next();
-                this.update(this.chatlog, false);
+                this.update(false);
             });
         }
 
@@ -179,7 +178,7 @@ class Chatbox {
                     console.error(error);
                 }
                 this.chatlog.clearCache();
-                this.update(this.chatlog, false);
+                this.update(false);
                 return;
             }
             const input = document.createElement('input');
@@ -196,7 +195,7 @@ class Chatbox {
                     }
                     avatar.src = reader.result;
                     this.chatlog.clearCache();
-                    this.update(this.chatlog, false);
+                    this.update(false);
                 });
                 reader.readAsDataURL(file);
             });

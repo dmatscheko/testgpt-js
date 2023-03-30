@@ -3,7 +3,7 @@
 
 
     // Interact with OpenAI API
-    async function openaiChat(message, chatlog, model, temperature, top_p, user_role, { chatlogEl, submitBtn }) {
+    async function openaiChat(message, chatlog, model, temperature, top_p, user_role, ui) {
         if (!regenerateLastAnswer && !message) return;
         if (receiving) return;
         receiving = true;
@@ -14,12 +14,12 @@
                 content: message
             };
             chatlog.addMessage(prompt_msg);
-            chatlogEl.update(chatlog);
+            ui.chatlogEl.update();
             receiving = false;
             return;
         }
 
-        submitBtn.innerHTML = message_stop;
+        ui.submitBtn.innerHTML = message_stop;
         let entryCreated = false;
         try {
             if (!regenerateLastAnswer) {
@@ -32,7 +32,7 @@
                 chatlog.addMessage(null);
             }
             regenerateLastAnswer = false;
-            chatlogEl.update(chatlog);
+            ui.chatlogEl.update();
             chatlog.getFirstMessage().value.content = first_prompt + getDatePrompt();
             const payload = {
                 model,
@@ -78,7 +78,7 @@
                     lastMessage.value.content += content;
                     lastMessage.cache = null;
                 }
-                chatlogEl.update(chatlog);
+                ui.chatlogEl.update();
             }
         } catch (error) {
             console.error(error);
@@ -98,12 +98,12 @@
             }
         } finally {
             receiving = false;
-            submitBtn.innerHTML = message_submit;
+            ui.submitBtn.innerHTML = message_submit;
             if (entryCreated) {
                 chatlog.getLastMessage().metadata = { model, temperature, top_p };
             }
 
-            chatlogEl.update(chatlog);
+            ui.chatlogEl.update();
         }
     }
 
@@ -122,25 +122,27 @@
 
     // Sets up event listeners for the chat interface
     // ChatApp.prototype.setUpEventListeners = () => {
-    globals.setUpEventListeners = (chatlog, { chatlogEl, messageEl, submitBtn, newChatBtn, saveChatBtn, loadChatBtn, temperatureEl, topPEl }) => {
-        submitBtn.addEventListener("click", () => {
+    globals.setUpEventListeners = (chatlog, ui) => {
+        // { ui.chatlogEl, ui.messageEl, ui.submitBtn, ui.newChatBtn, ui.saveChatBtn, ui.loadChatBtn, ui.temperatureEl, ui.topPEl }
+
+        ui.submitBtn.addEventListener("click", () => {
             if (receiving) {
                 controller.abort();
                 return;
             }
-            openaiChat(messageEl.value, chatlog, document.querySelector('input[name="model"]:checked').value, Number(temperatureEl.value), Number(topPEl.value), document.querySelector('input[name="user_role"]:checked').value, { chatlogEl, submitBtn });
-            messageEl.value = "";
-            messageEl.style.height = "auto";
+            openaiChat(ui.messageEl.value, chatlog, document.querySelector('input[name="model"]:checked').value, Number(ui.temperatureEl.value), Number(ui.topPEl.value), document.querySelector('input[name="user_role"]:checked').value, ui);
+            ui.messageEl.value = "";
+            ui.messageEl.style.height = "auto";
         });
 
-        messageEl.addEventListener("keydown", (event) => {
+        ui.messageEl.addEventListener("keydown", (event) => {
             if (event.keyCode === 13 && (event.shiftKey || event.ctrlKey || event.altKey)) {
                 event.preventDefault();
-                submitBtn.click();
+                ui.submitBtn.click();
             }
         });
 
-        messageEl.addEventListener("input", function () {
+        ui.messageEl.addEventListener("input", function () {
             this.style.height = "auto";
             let height = this.scrollHeight - parseInt(getComputedStyle(this).paddingTop) - parseInt(getComputedStyle(this).paddingBottom);
             if (height > window.innerHeight / 2) {
@@ -158,19 +160,19 @@
             }
         });
 
-        newChatBtn.addEventListener("click", () => {
+        ui.newChatBtn.addEventListener("click", () => {
             if (receiving) {
                 controller.abort();
                 return;
             }
-            messageEl.value = start_message;
-            messageEl.style.height = "auto";
+            ui.messageEl.value = start_message;
+            ui.messageEl.style.height = "auto";
             chatlog.rootAlternatives = null;
             chatlog.addMessage({ role: "system", content: first_prompt });
-            chatlogEl.update(chatlog);
+            ui.chatlogEl.update();
         });
 
-        saveChatBtn.addEventListener("click", () => {
+        ui.saveChatBtn.addEventListener("click", () => {
             const jsonData = JSON.stringify(chatlog);
             const blob = new Blob([jsonData], { type: 'application/json' });
             const url = URL.createObjectURL(blob);
@@ -183,7 +185,7 @@
             document.body.removeChild(a);
         });
 
-        loadChatBtn.addEventListener("click", () => {
+        ui.loadChatBtn.addEventListener("click", () => {
             const input = document.createElement('input');
             input.type = 'file';
             input.accept = 'application/json';
@@ -198,7 +200,7 @@
                     const jsonData = reader.result;
                     const data = JSON.parse(jsonData);
                     chatlog.load(data.rootAlternatives);
-                    chatlogEl.update(chatlog);
+                    ui.chatlogEl.update();
                 });
 
                 reader.readAsText(file);
@@ -208,31 +210,25 @@
             input.click();
         });
 
-        const temperature_val = document.getElementById('temperature-value');
-        temperature_val.textContent = temperatureEl.value;
-        temperatureEl.addEventListener('input', () => {
-            temperature_val.textContent = temperatureEl.value;
+        ui.temperatureValueEl.textContent = ui.temperatureEl.value;
+        ui.temperatureEl.addEventListener('input', () => {
+            ui.temperatureValueEl.textContent = ui.temperatureEl.value;
         });
 
-        const top_p_val = document.getElementById('top-p-value');
-        top_p_val.textContent = topPEl.value;
-        topPEl.addEventListener('input', () => {
-            top_p_val.textContent = topPEl.value;
+        ui.topPValueEl.textContent = ui.topPEl.value;
+        ui.topPEl.addEventListener('input', () => {
+            ui.topPValueEl.textContent = ui.topPEl.value;
         });
 
-        const settings_btn = document.getElementById('settings-btn');
-        const settings = document.getElementById('settings');
-        settings_btn.addEventListener('click', () => {
-            settings.classList.toggle('open');
+        ui.settingsBtn.addEventListener('click', () => {
+            ui.settingsEl.classList.toggle('open');
         });
 
-        const login_btn = document.getElementById('login-btn');
-        login_btn.addEventListener('click', () => {
+        ui.loginBtn.addEventListener('click', () => {
             getApiKey();
         });
 
-        const logout_btn = document.getElementById('logout-btn');
-        logout_btn.addEventListener('click', () => {
+        ui.logoutBtn.addEventListener('click', () => {
             try {
                 localStorage.removeItem("api_key");
             } catch (error) {
