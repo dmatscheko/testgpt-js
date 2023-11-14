@@ -70,12 +70,20 @@
     <div id="settings">
         <p>
             <label for="model">GPT model</label><br>
+
             <input type="radio" id="model_gpt-3.5-turbo" name="model" value="gpt-3.5-turbo" checked>
             <label for="model_gpt-3.5-turbo">gpt-3.5-turbo</label><br>
+            <input type="radio" id="model_gpt-3.5-turbo-16k" name="model" value="gpt-3.5-turbo-16k">
+            <label for="model_gpt-3.5-turbo-16k">gpt-3.5-turbo-16k</label><br>
+
             <input type="radio" id="model_gpt-4" name="model" value="gpt-4">
             <label for="model_gpt-4">gpt-4</label><br>
             <input type="radio" id="model_gpt-4-32k" name="model" value="gpt-4-32k">
-            <label for="model_gpt-4-32k">gpt-4-32k</label>
+            <label for="model_gpt-4-32k">gpt-4-32k</label><br>
+            <input type="radio" id="model_gpt-4-1106-preview" name="model" value="gpt-4-1106-preview">
+            <label for="model_gpt-4-1106-preview">gpt-4-1106-preview (128k)</label><br>
+            <input type="radio" id="model_gpt-4-vision-preview" name="model" value="gpt-4-vision-preview">
+            <label for="model_gpt-4-vision-preview">gpt-4-vision-preview</label>
         </p>
         <p>
             <label for="temperature">Temperature</label><br>
@@ -87,6 +95,12 @@
             <input type="range" id="top_p" min="0" max="1.0" step="0.05" value="1.0">
             <span id="top_p-value"></span>
         </p>
+        <!--
+        <p>
+            TODO: seed
+            ( https://platform.openai.com/docs/api-reference/chat/create#chat-create-seed )
+        </p>
+        -->
         <p>
             <label>User role</label><br>
             <input type="radio" id="user" name="user_role" value="user" checked>
