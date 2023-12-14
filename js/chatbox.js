@@ -36,7 +36,6 @@ class Chatbox {
 
             const msgIdx = alternative.activeMessageIndex;
             const msgCnt = alternative.messages.length;
-            pos++;
 
             if (message.value === null) {
                 let role = 'assistant';
@@ -58,6 +57,7 @@ class Chatbox {
             lastRole = message.value.role;
 
             alternative = message.answerAlternatives;
+            pos++;
         }
 
         this.container.replaceChildren(fragment);

@@ -124,7 +124,7 @@ class Chatlog {
         let pos = 0;
         let current = this.rootAlternatives;
         while (current !== null) {
-            if (pos === n) return current;
+            if (pos >= n) return current;
             const activeMessage = current.getActiveMessage();
             if (activeMessage === null || activeMessage.answerAlternatives === null) break;
             current = activeMessage.answerAlternatives;
