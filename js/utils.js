@@ -41,6 +41,10 @@
                 top_p,
                 stream: true,
             };
+
+            // do not send initial prompt without other messages
+            if (payload.messages.length <= 1) return;
+
             const response = await fetch('https://api.openai.com/v1/chat/completions', {
                 signal: controller.signal,
                 method: 'POST',
@@ -109,7 +113,7 @@
 
 
     // Returns the current date and time as prompt part
-    function getDatePrompt() {
+    globals.getDatePrompt = () => {
         const now = new Date();
         const year = now.getFullYear();
         const month = String(now.getMonth() + 1).padStart(2, '0');
@@ -130,6 +134,7 @@
                 return;
             }
             openaiChat(ui.messageEl.value, chatlog, document.querySelector('input[name="model"]:checked').value, Number(ui.temperatureEl.value), Number(ui.topPEl.value), document.querySelector('input[name="user_role"]:checked').value, ui);
+            document.getElementById('user').checked = true;
             ui.messageEl.value = '';
             ui.messageEl.style.height = 'auto';
         });

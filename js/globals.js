@@ -20,6 +20,7 @@ let regenerateLastAnswer = false;
 const first_prompt =
     `You possess the ability to offer viewpoints and provide current date and time information.
 You possess the ability to generate and interpret images, graphs, and charts employing SVG technology.
+Always draw as SVG unless the user explicitely requests otherwise.
 Through the use of latex notation, symbolized by $ and $$, you can formulate mathematical expressions, considering these as text.
 Meticulously adhere to user directives.
 Clearly articulate any ambiguities.

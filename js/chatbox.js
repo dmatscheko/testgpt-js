@@ -30,6 +30,7 @@ class Chatbox {
             if (message.cache !== null) {
                 fragment.appendChild(message.cache);
                 lastRole = message.value.role;
+                alternative = message.answerAlternatives;
                 pos++;
                 continue;
             }
@@ -110,7 +111,18 @@ class Chatbox {
         el.getElementsByClassName('msg_mod-add-btn')[0].addEventListener('click', async () => {
             const messageInp = document.getElementById('message-inp');
             if (type === 'ping') {
-                if (messageInp.value === '') messageInp.value = decodeURIComponent(el.dataset.plaintext);
+                if (messageInp.value === '') {
+                    if (pos === 0) {
+                        messageInp.value = first_prompt + getDatePrompt()
+                    } else {
+                        messageInp.value = decodeURIComponent(el.dataset.plaintext);
+                    }
+                }
+                if (message.value.role === 'system') {
+                    document.getElementById('system').checked = true;
+                } else {
+                    document.getElementById('user').checked = true;
+                }
             }
             const alternative = this.chatlog.getNthAlternatives(pos);
             if (alternative !== null) alternative.addMessage(null);
