@@ -19,11 +19,14 @@ class Chatbox {
         const fragment = document.createDocumentFragment();
 
         // Show the active path through the chatlog
-        let message = this.chatlog.getFirstMessage();
-        let alternative = null;
+        let alternative = this.chatlog.rootAlternatives;
         let lastRole = 'assistant';
         let pos = 0;
         while (true) {
+            if (alternative == null) break;
+            let message = alternative.getActiveMessage();
+            if (message === null) break;
+
             if (message.cache !== null) {
                 fragment.appendChild(message.cache);
                 lastRole = message.value.role;
@@ -55,9 +58,6 @@ class Chatbox {
             lastRole = message.value.role;
 
             alternative = message.answerAlternatives;
-            if (alternative == null) break;
-            message = alternative.getActiveMessage();
-            if (message === null) break;
         }
 
         this.container.replaceChildren(fragment);
