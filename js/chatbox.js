@@ -110,23 +110,25 @@ class Chatbox {
 
         el.getElementsByClassName('msg_mod-add-btn')[0].addEventListener('click', async () => {
             const messageInp = document.getElementById('message-inp');
+            let newMessage = null;
             if (type === 'ping') {
-                if (messageInp.value === '') {
-                    if (pos === 0) {
-                        messageInp.value = first_prompt + getDatePrompt();
-                    } else {
-                        messageInp.value = decodeURIComponent(el.dataset.plaintext);
-                    }
-                    document.getElementById('message-inp').dispatchEvent(new Event('input', { bubbles: true }));
-                }
-                if (message.value.role === 'system') {
-                    document.getElementById('system').checked = true;
+                if (pos === 0) {
+                    // messageInp.value = first_prompt + getDatePrompt();
+                    newMessage = { role: 'system', content: first_prompt + getDatePrompt() };
                 } else {
-                    document.getElementById('user').checked = true;
+                    if (messageInp.value === '') {
+                            messageInp.value = message.value.content.trim();
+                            messageInp.dispatchEvent(new Event('input', { bubbles: true }));
+                            if (message.value.role === 'system') {
+                                document.getElementById('system').checked = true;
+                            } else {
+                                document.getElementById('user').checked = true;
+                            }
+                    }
                 }
             }
             const alternative = this.chatlog.getNthAlternatives(pos);
-            if (alternative !== null) alternative.addMessage(null);
+            if (alternative !== null) alternative.addMessage(newMessage);
             this.update(false);
             if (type === 'pong') {
                 // Assistant message
