@@ -113,10 +113,11 @@ class Chatbox {
             if (type === 'ping') {
                 if (messageInp.value === '') {
                     if (pos === 0) {
-                        messageInp.value = first_prompt + getDatePrompt()
+                        messageInp.value = first_prompt + getDatePrompt();
                     } else {
                         messageInp.value = decodeURIComponent(el.dataset.plaintext);
                     }
+                    document.getElementById('message-inp').dispatchEvent(new Event('input', { bubbles: true }));
                 }
                 if (message.value.role === 'system') {
                     document.getElementById('system').checked = true;
