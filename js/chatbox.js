@@ -24,11 +24,6 @@ class Chatbox {
         let lastRole = 'assistant';
         let pos = 0;
         while (true) {
-            alternative = message.answerAlternatives;
-            if (alternative == null) break;
-            message = alternative.getActiveMessage();
-            if (message === null) break;
-
             if (message.cache !== null) {
                 fragment.appendChild(message.cache);
                 lastRole = message.value.role;
@@ -58,6 +53,11 @@ class Chatbox {
             fragment.appendChild(messageEl);
             message.cache = messageEl;
             lastRole = message.value.role;
+
+            alternative = message.answerAlternatives;
+            if (alternative == null) break;
+            message = alternative.getActiveMessage();
+            if (message === null) break;
         }
 
         this.container.replaceChildren(fragment);

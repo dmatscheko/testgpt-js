@@ -33,7 +33,7 @@
             }
             regenerateLastAnswer = false;
             ui.chatlogEl.update();
-            chatlog.getFirstMessage().value.content = first_prompt + getDatePrompt();
+            // chatlog.getFirstMessage().value.content = first_prompt + getDatePrompt();
             const payload = {
                 model,
                 messages: chatlog.getActiveMessageValues(),
@@ -167,7 +167,7 @@
             ui.messageEl.value = start_message;
             ui.messageEl.style.height = 'auto';
             chatlog.rootAlternatives = null;
-            chatlog.addMessage({ role: 'system', content: first_prompt });
+            chatlog.addMessage({ role: 'system', content: first_prompt + getDatePrompt() });
             ui.chatlogEl.update();
         });
 
