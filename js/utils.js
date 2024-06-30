@@ -1,7 +1,32 @@
 (function (globals) {
     'use strict';
 
+    let apiUrl = 'https://api.openai.com/v1/chat/completions';
+    const alternateApiUrl = 'https://my-openai-gemini-beta-two.vercel.app/v1/chat/completions'; //Gemini Use
 
+    document.getElementById('toggle-api-btn').addEventListener('click', () => {
+        apiUrl = (apiUrl === 'https://api.openai.com/v1/chat/completions') ? alternateApiUrl : 'https://api.openai.com/v1/chat/completions';
+        showNotification(`API URL switched to: ${apiUrl}`);
+    });
+
+    function showNotification(message, color = "rgba(36, 48, 78, 0.8)") {
+        let notification = document.createElement("div");
+        notification.style.position = "fixed";
+        notification.style.bottom = "20px";
+        notification.style.right = "20px";
+        notification.style.backgroundColor = color;
+        notification.style.color = "#fff";
+        notification.style.padding = "15px 30px";
+        notification.style.borderRadius = "5px";
+        notification.style.fontFamily = "Arial";
+        notification.style.backdropFilter = "blur(5px)";
+        notification.textContent = message;
+        document.body.appendChild(notification);
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+    }
+    
     // Interact with OpenAI API
     async function openaiChat(message, chatlog, model, temperature, top_p, user_role, ui) {
         if (!regenerateLastAnswer && !message) return;
@@ -45,15 +70,15 @@
             // do not send initial prompt without other messages
             if (payload.messages.length <= 1) return;
 
-            const response = await fetch('https://api.openai.com/v1/chat/completions', {
-                signal: controller.signal,
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${api_key}`
-                },
-                body: JSON.stringify(payload)
-            });
+                        const response = await fetch(apiUrl, {
+                            signal: controller.signal,
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Authorization': `Bearer ${api_key}`
+                            },
+                            body: JSON.stringify(payload)
+                        });
             const reader = response.body.getReader();
             while (true) {
                 const { done, value } = await reader.read();
@@ -86,6 +111,7 @@
             }
         } catch (error) {
             console.error(error);
+            showNotification(`${error}`, "rgba(167, 49, 49, 0.51)");
             if (('' + error).startsWith('AbortError: ')) {
                 controller = new AbortController();
                 return;
@@ -237,6 +263,7 @@
                 localStorage.removeItem('api_key');
             } catch (error) {
                 console.error(error);
+                showNotification(`${error}`, "rgba(167, 49, 49, 0.51)");
             }
             location.reload();
         });
@@ -267,6 +294,7 @@
                 globals.api_key = localStorage.api_key;
             } catch (error) {
                 console.error(error);
+                showNotification(`${error}`, "rgba(167, 49, 49, 0.51)");
             }
             if (typeof api_key != 'undefined' && api_key != '') {
                 showLogoutButton();
@@ -283,6 +311,7 @@
                 localStorage.api_key = api_key;
             } catch (error) {
                 console.error(error);
+                showNotification(`${error}`, "rgba(167, 49, 49, 0.51)");
             }
             if (typeof api_key == 'undefined' || api_key == '') {
                 showLoginButton();
